@@ -6,16 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="@yield('description', 'Đăng nhập hệ thống quản lý xe máy')">
     <meta name="author" content="QLXM">
-    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900&display=swap"
+        rel="stylesheet">
 
     <title>@yield('title', 'Đăng nhập - QLXM')</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ secure_asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
 
     <!-- Additional CSS Files -->
-    <link rel="stylesheet" href="{{ asset('css/fontawesome.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/templatemo-sixteen.css') }}">
+    <link rel="stylesheet" href="{{ secure_asset('css/fontawesome.css') }}">
+    <link rel="stylesheet" href="{{ secure_asset('css/templatemo-sixteen.css') }}">
 
     <style>
         body {
@@ -233,8 +234,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* Responsive */
@@ -285,8 +291,8 @@
     </div>
 
     <!-- Bootstrap core JavaScript -->
-    <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ secure_asset('vendor/jquery/jquery.min.js') }}"></script>
+    <script src="{{ secure_asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 
     <script>
         // Form Enhancement
@@ -299,7 +305,7 @@
                     if (submitBtn) {
                         submitBtn.classList.add('btn-loading');
                         submitBtn.disabled = true;
-                        
+
                         // Reset after 10 seconds (fallback)
                         setTimeout(() => {
                             submitBtn.classList.remove('btn-loading');
@@ -315,7 +321,7 @@
                 input.addEventListener('focus', function() {
                     this.parentElement.classList.add('focused');
                 });
-                
+
                 input.addEventListener('blur', function() {
                     this.parentElement.classList.remove('focused');
                 });
