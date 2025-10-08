@@ -26,13 +26,13 @@ class AuthController extends Controller
 
         if ($response->ok()) {
             $responseData = $response->json();
-            if (isset($responseData['user'])) {
-                // Lưu thông tin user vào session
+            if (isset($responseData['token']) && isset($responseData['user'])) {
+                // Lưu token thật và thông tin user vào session
+                Session::put('admin_token', $responseData['token']);
                 Session::put('admin_user', $responseData['user']);
-                Session::put('admin_token', 'admin_logged_in_' . $responseData['user']['id']);
                 return redirect()->route('admin.dashboard');
             } else {
-                return back()->withErrors(['email' => 'Dữ liệu user không tồn tại trong response!'])->withInput();
+                return back()->withErrors(['email' => 'Token hoặc user không tồn tại trong response!'])->withInput();
             }
         } else {
             return back()->withErrors(['email' => 'Đăng nhập thất bại! Status: ' . $response->status()])->withInput();
