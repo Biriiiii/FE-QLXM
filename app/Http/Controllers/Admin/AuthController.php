@@ -24,11 +24,18 @@ class AuthController extends Controller
             'password' => $request->input('password'),
         ]);
 
-        if ($response->ok() && isset($response['token'])) {
-            Session::put('admin_token', $response['token']);
-            return redirect()->route('admin.dashboard');
+        if ($response->ok()) {
+            $responseData = $response->json();
+            if (isset($responseData['user'])) {
+                // Lưu thông tin user vào session
+                Session::put('admin_user', $responseData['user']);
+                Session::put('admin_token', 'admin_logged_in_' . $responseData['user']['id']);
+                return redirect()->route('admin.dashboard');
+            } else {
+                return back()->withErrors(['email' => 'Dữ liệu user không tồn tại trong response!'])->withInput();
+            }
         } else {
-            return back()->withErrors(['email' => 'Đăng nhập thất bại!'])->withInput();
+            return back()->withErrors(['email' => 'Đăng nhập thất bại! Status: ' . $response->status()])->withInput();
         }
     }
 
@@ -56,12 +63,13 @@ class AuthController extends Controller
     // Đăng xuất
     public function logout()
     {
-        $apiUrl = env('BE_API_URL', 'https://be-qlxm-e11819409fff.herokuapp.com/');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
         $token = Session::get('admin_token');
         if ($token) {
             Http::withToken($token)->post($apiUrl . '/api/auth/logout');
         }
         Session::forget('admin_token');
+        Session::forget('admin_user');
         return redirect()->route('admin.auth.login');
     }
 }
