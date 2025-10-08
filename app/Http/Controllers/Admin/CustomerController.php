@@ -16,7 +16,7 @@ class CustomerController extends Controller
         if (!session('admin_token')) {
             return redirect()->route('admin.auth.login');
         }
-        $apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
         $token = session('admin_token');
         $customers = Http::withToken($token)->get($apiUrl . '/api/customers')->json('data') ?? [];
         return view('admin.customers.index', compact('customers'));
@@ -36,7 +36,7 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $data = $request->all();
-        $response = Http::post(env('BE_API_URL', 'https://be-qlxm-e11819409fff.herokuapp.com/') . '/api/customers', $data);
+        $response = Http::post(env('BE_API_URL', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/') . '/api/customers', $data);
         if ($response->successful()) {
             return redirect()->route('admin.customers.index')->with('success', 'Tạo khách hàng thành công.');
         }
@@ -48,7 +48,7 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
-        $response = Http::get(env('BE_API_URL', 'https://be-qlxm-e11819409fff.herokuapp.com/') . "/api/customers/{$id}");
+        $response = Http::get(env('BE_API_URL', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/') . "/api/customers/{$id}");
         $customer = $response->json() ?? [];
         return view('admin.customers.show', compact('customer'));
     }
@@ -58,7 +58,7 @@ class CustomerController extends Controller
      */
     public function edit($id)
     {
-        $response = Http::get("https://be-qlxm-e11819409fff.herokuapp.com//api/customers/{$id}");
+        $response = Http::get("https://be-qlxm-9b1bc6070adf.herokuapp.com//api/customers/{$id}");
         $customer = $response->json() ?? [];
         return view('admin.customers.edit', compact('customer'));
     }
@@ -69,7 +69,7 @@ class CustomerController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->all();
-        $response = Http::put(env('BE_API_URL', 'https://be-qlxm-e11819409fff.herokuapp.com/') . "/api/customers/{$id}", $data);
+        $response = Http::put(env('BE_API_URL', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/') . "/api/customers/{$id}", $data);
         if ($response->successful()) {
             return redirect()->route('admin.customers.index')->with('success', 'Cập nhật khách hàng thành công.');
         }
@@ -81,7 +81,7 @@ class CustomerController extends Controller
      */
     public function destroy($id)
     {
-        $response = Http::delete(env('BE_API_URL', 'https://be-qlxm-e11819409fff.herokuapp.com/') . "/api/customers/{$id}");
+        $response = Http::delete(env('BE_API_URL', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/') . "/api/customers/{$id}");
         if ($response->successful()) {
             return redirect()->route('admin.customers.index')->with('success', 'Xóa khách hàng thành công.');
         }

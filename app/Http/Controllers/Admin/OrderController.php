@@ -16,7 +16,7 @@ class OrderController extends Controller
         if (!session('admin_token')) {
             return redirect()->route('admin.auth.login');
         }
-        $apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
         $token = session('admin_token');
         $orders = Http::withToken($token)->get($apiUrl . '/api/orders')->json('data') ?? [];
         return view('admin.orders.index', compact('orders'));
@@ -27,7 +27,7 @@ class OrderController extends Controller
      */
     public function create()
     {
-        $customers = Http::get(env('BE_API_URL', 'https://be-qlxm-e11819409fff.herokuapp.com/') . '/api/customers')->json() ?? [];
+        $customers = Http::get(env('BE_API_URL', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/') . '/api/customers')->json() ?? [];
         return view('admin.orders.create', compact('customers'));
     }
 
@@ -37,7 +37,7 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $data = $request->all();
-        $response = Http::post(env('BE_API_URL', 'https://be-qlxm-e11819409fff.herokuapp.com/') . '/api/orders', $data);
+        $response = Http::post(env('BE_API_URL', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/') . '/api/orders', $data);
         if ($response->successful()) {
             return redirect()->route('admin.orders.index')->with('success', 'Tạo đơn hàng thành công.');
         }
@@ -49,7 +49,7 @@ class OrderController extends Controller
      */
     public function show($id)
     {
-        $response = Http::get(env('BE_API_URL', 'https://be-qlxm-e11819409fff.herokuapp.com/') . "/api/orders/{$id}");
+        $response = Http::get(env('BE_API_URL', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/') . "/api/orders/{$id}");
         $order = $response->json() ?? [];
         return view('admin.orders.show', compact('order'));
     }
@@ -59,8 +59,8 @@ class OrderController extends Controller
      */
     public function edit($id)
     {
-        $order = Http::get(env('BE_API_URL', 'https://be-qlxm-e11819409fff.herokuapp.com/') . "/api/orders/{$id}")->json() ?? [];
-        $customers = Http::get(env('BE_API_URL', 'https://be-qlxm-e11819409fff.herokuapp.com/') . '/api/customers')->json() ?? [];
+        $order = Http::get(env('BE_API_URL', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/') . "/api/orders/{$id}")->json() ?? [];
+        $customers = Http::get(env('BE_API_URL', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/') . '/api/customers')->json() ?? [];
         return view('admin.orders.edit', compact('order', 'customers'));
     }
 
@@ -70,7 +70,7 @@ class OrderController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->all();
-        $response = Http::put(env('BE_API_URL', 'https://be-qlxm-e11819409fff.herokuapp.com/') . "/api/orders/{$id}", $data);
+        $response = Http::put(env('BE_API_URL', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/') . "/api/orders/{$id}", $data);
         if ($response->successful()) {
             return redirect()->route('admin.orders.index')->with('success', 'Cập nhật đơn hàng thành công.');
         }
@@ -82,7 +82,7 @@ class OrderController extends Controller
      */
     public function destroy($id)
     {
-        $response = Http::delete(env('BE_API_URL', 'https://be-qlxm-e11819409fff.herokuapp.com/') . "/api/orders/{$id}");
+        $response = Http::delete(env('BE_API_URL', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/') . "/api/orders/{$id}");
         if ($response->successful()) {
             return redirect()->route('admin.orders.index')->with('success', 'Xóa đơn hàng thành công.');
         }

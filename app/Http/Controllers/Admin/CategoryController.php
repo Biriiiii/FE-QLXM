@@ -14,7 +14,7 @@ class CategoryController extends Controller
         if (!session('admin_token')) {
             return redirect()->route('admin.auth.login');
         }
-        $apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
         $token = session('admin_token');
         $categories = Http::withToken($token)->get($apiUrl . '/api/categories')->json('data') ?? [];
         return view('admin.categories.index', compact('categories'));
@@ -32,7 +32,7 @@ class CategoryController extends Controller
         if (!session('admin_token')) {
             return redirect()->route('admin.auth.login');
         }
-        $apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
         $token = session('admin_token');
         $data = $request->all();
         $response = Http::withToken($token)->post($apiUrl . '/api/categories', $data);
@@ -48,7 +48,7 @@ class CategoryController extends Controller
         if (!session('admin_token')) {
             return redirect()->route('admin.auth.login');
         }
-        $apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
         $token = session('admin_token');
         $response = Http::withToken($token)->get($apiUrl . "/api/categories/{$id}");
         $category = $response->json('data') ?? [];
@@ -61,7 +61,7 @@ class CategoryController extends Controller
         if (!session('admin_token')) {
             return redirect()->route('admin.auth.login');
         }
-        $apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
         $token = session('admin_token');
         $data = $request->all();
         $response = Http::withToken($token)->put($apiUrl . "/api/categories/{$id}", $data);
@@ -75,7 +75,7 @@ class CategoryController extends Controller
         if (!session('admin_token')) {
             return redirect()->route('admin.auth.login');
         }
-        $apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
         $token = session('admin_token');
         $response = Http::withToken($token)->delete($apiUrl . "/api/categories/{$id}");
         if ($response->successful()) {

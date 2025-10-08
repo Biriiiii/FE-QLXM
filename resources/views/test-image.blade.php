@@ -34,8 +34,8 @@
 
     <div class="image-test">
         <h3>1. Test với URL backend storage:</h3>
-        <p><strong>URL Backend:</strong> https://be-qlxm-e11819409fff.herokuapp.com//storage/products/sample.jpg</p>
-        <img src="https://be-qlxm-e11819409fff.herokuapp.com//storage/products/sample.jpg" alt="Test Image Backend"
+        <p><strong>URL Backend:</strong> https://be-qlxm-9b1bc6070adf.herokuapp.com//storage/products/sample.jpg</p>
+        <img src="https://be-qlxm-9b1bc6070adf.herokuapp.com//storage/products/sample.jpg" alt="Test Image Backend"
             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
         <div class="error" style="display:none;">❌ Không tìm thấy hình ảnh từ backend</div>
     </div>
@@ -52,7 +52,7 @@
         <h3>3. Cách sử dụng trong code (Updated):</h3>
         <pre><code>
 // Trong Controller - Lấy ảnh từ BACKEND:
-$apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
+$apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
 $product['image_url'] = !empty($product['image'])
     ? $apiUrl . '/storage/' . $product['image']
     : null;

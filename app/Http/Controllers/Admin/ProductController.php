@@ -14,7 +14,7 @@ class ProductController extends Controller
 
     public function __construct()
     {
-        $this->apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
+        $this->apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
         $this->token = session('admin_token') ?? null;
     }
 

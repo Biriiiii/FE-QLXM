@@ -14,7 +14,7 @@ class BrandController extends Controller
         if (!session('admin_token')) {
             return redirect()->route('admin.auth.login');
         }
-        $apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
         $token = session('admin_token');
         try {
             $page = $request->query('page', 1);
@@ -61,7 +61,7 @@ class BrandController extends Controller
         if (!session('admin_token')) {
             return redirect()->route('admin.auth.login');
         }
-        $apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
         $token = session('admin_token');
         $data = $request->except('logo');
         $http = Http::withToken($token);
@@ -84,7 +84,7 @@ class BrandController extends Controller
         if (!session('admin_token')) {
             return redirect()->route('admin.auth.login');
         }
-        $apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
         $token = session('admin_token');
         $response = Http::withToken($token)->get($apiUrl . "/api/brands/{$id}");
         $json = $response->json();
@@ -97,7 +97,7 @@ class BrandController extends Controller
         if (!session('admin_token')) {
             return redirect()->route('admin.auth.login');
         }
-        $apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
         $token = session('admin_token');
         $data = $request->except('logo');
         $http = Http::withToken($token);
@@ -120,7 +120,7 @@ class BrandController extends Controller
         if (!session('admin_token')) {
             return redirect()->route('admin.auth.login');
         }
-        $apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
         $token = session('admin_token');
         $response = Http::withToken($token)->delete($apiUrl . "/api/brands/{$id}");
         if ($response->successful()) {
