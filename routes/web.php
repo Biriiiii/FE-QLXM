@@ -48,7 +48,11 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::prefix('admin')->name('admin.')->group(function () {
     // Auth
     Route::get('/login', [AuthController::class, 'showLogin'])->name('auth.login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
+
+    // Test login without CSRF
+    Route::post('/login-test', [AuthController::class, 'login'])->name('auth.login.test')->withoutMiddleware(['csrf']);
+
     Route::get('/forgot', [AuthController::class, 'showForgot'])->name('auth.forgot');
     Route::post('/forgot', [AuthController::class, 'forgot']);
     Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
