@@ -13,7 +13,7 @@ class DashboardController extends Controller
         if (!session('admin_token')) {
             return redirect()->route('admin.auth.login');
         }
-        $apiUrl = env('BE_API_URL', 'http://localhost:8000');
+        $apiUrl = env('BE_API_URL', 'https://be-qlxm-e11819409fff.herokuapp.com/');
         $token = session('admin_token');
         $products = Http::withToken($token)->get($apiUrl . '/api/products')->json('data') ?? [];
         $customers = Http::withToken($token)->get($apiUrl . '/api/customers')->json('data') ?? [];

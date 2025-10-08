@@ -18,7 +18,7 @@ class AuthController extends Controller
     // Xử lý đăng nhập qua API BE
     public function login(Request $request)
     {
-        $apiUrl = env('BE_API_URL', 'http://localhost:8000');
+        $apiUrl = env('BE_API_URL', 'https://be-qlxm-e11819409fff.herokuapp.com/');
         $response = Http::post($apiUrl . '/api/auth/login', [
             'email' => $request->input('email'),
             'password' => $request->input('password'),
@@ -41,7 +41,7 @@ class AuthController extends Controller
     // Xử lý quên mật khẩu qua API BE
     public function forgot(Request $request)
     {
-        $apiUrl = env('BE_API_URL', 'http://localhost:8000');
+        $apiUrl = env('BE_API_URL', 'https://be-qlxm-e11819409fff.herokuapp.com/');
         $response = Http::post($apiUrl . '/api/auth/forgot', [
             'email' => $request->input('email'),
         ]);
@@ -56,7 +56,7 @@ class AuthController extends Controller
     // Đăng xuất
     public function logout()
     {
-        $apiUrl = env('BE_API_URL', 'http://localhost:8000');
+        $apiUrl = env('BE_API_URL', 'https://be-qlxm-e11819409fff.herokuapp.com/');
         $token = Session::get('admin_token');
         if ($token) {
             Http::withToken($token)->post($apiUrl . '/api/auth/logout');

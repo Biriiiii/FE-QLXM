@@ -16,7 +16,7 @@ class UserController extends Controller
         if (!session('admin_token')) {
             return redirect()->route('admin.auth.login');
         }
-        $apiUrl = config('app.be_api_url', 'http://127.0.0.1:8000');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
         $token = session('admin_token');
         $users = Http::withToken($token)->get($apiUrl . '/api/users')->json('data') ?? [];
         return view('admin.users.index', compact('users'));
@@ -38,7 +38,7 @@ class UserController extends Controller
         if (!session('admin_token')) {
             return redirect()->route('admin.auth.login');
         }
-        $apiUrl = config('app.be_api_url', 'http://127.0.0.1:8000');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
         $token = session('admin_token');
         $data = [
             'name' => $request->input('name'),
@@ -73,7 +73,7 @@ class UserController extends Controller
         if (!session('admin_token')) {
             return redirect()->route('admin.auth.login');
         }
-        $apiUrl = config('app.be_api_url', 'http://127.0.0.1:8000');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
         $token = session('admin_token');
         $response = Http::withToken($token)->get($apiUrl . "/api/users/{$id}");
         $user = $response->json('data') ?? [];
@@ -88,7 +88,7 @@ class UserController extends Controller
         if (!session('admin_token')) {
             return redirect()->route('admin.auth.login');
         }
-        $apiUrl = config('app.be_api_url', 'http://127.0.0.1:8000');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
         $token = session('admin_token');
         $response = Http::withToken($token)->get($apiUrl . "/api/users/{$id}");
         $user = $response->json('data') ?? [];
@@ -103,7 +103,7 @@ class UserController extends Controller
         if (!session('admin_token')) {
             return redirect()->route('admin.auth.login');
         }
-        $apiUrl = config('app.be_api_url', 'http://127.0.0.1:8000');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
         $token = session('admin_token');
         $data = $request->all();
         $response = Http::withToken($token)->put($apiUrl . "/api/users/{$id}", $data);
@@ -121,7 +121,7 @@ class UserController extends Controller
         if (!session('admin_token')) {
             return redirect()->route('admin.auth.login');
         }
-        $apiUrl = config('app.be_api_url', 'http://127.0.0.1:8000');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
         $token = session('admin_token');
         $response = Http::withToken($token)->delete($apiUrl . "/api/users/{$id}");
         if ($response->successful()) {

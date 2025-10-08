@@ -13,7 +13,7 @@ class MotorcycleController extends Controller
 
     public function __construct()
     {
-        $this->apiUrl = config('app.be_api_url', 'http://127.0.0.1:8000');
+        $this->apiUrl = config('app.be_api_url', 'https://be-qlxm-e11819409fff.herokuapp.com/');
     }
     /**
      * Display a listing of motorcycles.
