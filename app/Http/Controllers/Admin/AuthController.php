@@ -30,12 +30,26 @@ class AuthController extends Controller
                 // Lưu token thật và thông tin user vào session
                 Session::put('admin_token', $responseData['token']);
                 Session::put('admin_user', $responseData['user']);
+
+                // Nếu là AJAX request, trả về JSON
+                if ($request->expectsJson()) {
+                    return response()->json(['success' => true, 'message' => 'Đăng nhập thành công!']);
+                }
+
                 return redirect()->route('admin.dashboard');
             } else {
-                return back()->withErrors(['email' => 'Token hoặc user không tồn tại trong response!'])->withInput();
+                $errorMessage = 'Token hoặc user không tồn tại trong response!';
+                if ($request->expectsJson()) {
+                    return response()->json(['success' => false, 'message' => $errorMessage], 422);
+                }
+                return back()->withErrors(['email' => $errorMessage])->withInput();
             }
         } else {
-            return back()->withErrors(['email' => 'Đăng nhập thất bại! Status: ' . $response->status()])->withInput();
+            $errorMessage = 'Đăng nhập thất bại! Status: ' . $response->status();
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $errorMessage], 422);
+            }
+            return back()->withErrors(['email' => $errorMessage])->withInput();
         }
     }
 
