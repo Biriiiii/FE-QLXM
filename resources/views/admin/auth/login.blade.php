@@ -30,6 +30,12 @@
             Đăng nhập hệ thống
         </button>
 
+        <div style="margin-top: 10px;">
+            <a href="/admin/dashboard" class="btn btn-secondary btn-sm">
+                Vào Dashboard (Direct)
+            </a>
+        </div>
+
         <div class="auth-links">
             <a href="#">Quên mật khẩu?</a>
         </div>
@@ -83,23 +89,22 @@
                         // Try multiple redirect methods
                         console.log('Attempting redirect...');
 
-                        // Method 1: Immediate redirect
+                        // Method 1: Redirect to static HTML page first
                         try {
-                            window.location.href = '/admin/dashboard';
+                            window.location.href = '/redirect-dashboard.html';
                         } catch (e) {
-                            console.error('Method 1 failed:', e);
+                            console.error('HTML redirect failed:', e);
 
-                            // Method 2: Replace
+                            // Method 2: Direct dashboard
                             try {
-                                window.location.replace('/admin/dashboard');
+                                window.open('/admin/dashboard', '_self');
                             } catch (e2) {
-                                console.error('Method 2 failed:', e2);
+                                console.error('Window.open failed:', e2);
 
-                                // Method 3: Assign
-                                window.location = '/admin/dashboard';
+                                // Method 3: Force location change
+                                document.location.href = '/admin/dashboard';
                             }
                         }
-
                     } else {
                         // Login failed
                         messageDiv.className = 'alert alert-danger';
