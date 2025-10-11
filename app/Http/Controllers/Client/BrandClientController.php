@@ -35,6 +35,7 @@ class BrandClientController extends Controller
             } else {
                 Log::error('Brand API Error: ' . $response->status());
             }
+            // Không cần xử lý gì thêm, chỉ sử dụng trực tiếp trường logo_url từ BE khi render view
             return view('client.brands.index', compact('brands', 'pagination'));
         } catch (\Exception $e) {
             Log::error('BrandClientController Error: ' . $e->getMessage());
@@ -71,6 +72,7 @@ class BrandClientController extends Controller
                 $products = $productsData['data'] ?? [];
                 $pagination = $productsData['meta'] ?? null;
             }
+            // Không cần xử lý gì thêm, chỉ sử dụng trực tiếp trường logo_url từ BE khi render view
             return view('client.brands.brand-detail', compact('brand', 'products', 'pagination'));
         } catch (\Exception $e) {
             Log::error('BrandClientController Show Error: ' . $e->getMessage());

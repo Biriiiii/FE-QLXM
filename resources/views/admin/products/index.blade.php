@@ -53,8 +53,7 @@
                                 <td>{{ $product['name'] }}</td>
                                 <td>
                                     @if (!empty($product['image']))
-                                        <img src="{{ config('app.be_api_url') }}/storage/{{ $product['image'] }}"
-                                            alt="{{ $product['name'] }}"
+                                        <img src="{{ $product['image_url'] }}" alt="{{ $product['name'] }}"
                                             style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
                                     @else
                                         <span class="text-muted">Không có ảnh</span>

@@ -33,9 +33,8 @@
                                 <td>{{ $brand['name'] }}</td>
                                 <td>{{ $brand['country'] ?? '-' }}</td>
                                 <td>
-                                    @if (!empty($brand['logo']))
-                                        <img src="{{ config('app.be_api_url') }}/storage/{{ $brand['logo'] }}"
-                                            alt="{{ $brand['name'] }}"
+                                    @if (!empty($brand['logo_url']))
+                                        <img src="{{ $brand['logo_url'] }}" alt="{{ $brand['name'] }}"
                                             style="width:40px; height:40px; object-fit:cover; border-radius:4px;">
                                     @else
                                         <span class="text-muted">Không có ảnh</span>

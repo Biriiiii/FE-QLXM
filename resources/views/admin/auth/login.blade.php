@@ -54,24 +54,6 @@
             <a href="{{ route('admin.auth.forgot') }}">Quên mật khẩu?</a>
         </div>
     </form>
-
-    {{-- Test form without CSRF --}}
-    <hr style="margin: 2rem 0;">
-    <div style="background: #f8f9fa; padding: 1rem; border-radius: 0.5rem;">
-        <h4>🧪 Test Login (No CSRF)</h4>
-        <form method="POST" action="{{ route('admin.auth.login.test') }}">
-            <div class="form-group">
-                <input type="email" name="email" class="form-control" value="admin@qlxm.vn" placeholder="Email"
-                    required>
-            </div>
-            <div class="form-group" style="margin-top: 1rem;">
-                <input type="password" name="password" class="form-control" value="admin123" placeholder="Password"
-                    required>
-            </div>
-            <button type="submit" class="btn btn-success" style="margin-top: 1rem;">Test Login (No CSRF)</button>
-        </form>
-    </div>
-
     <script>
         // Debug CSRF token
         console.log('CSRF Token:', document.querySelector('input[name="_token"]')?.value);

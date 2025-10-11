@@ -165,9 +165,8 @@
                         <div class="col-md-4">
                             <div class="team-member">
                                 <div class="thumb-container">
-                                    @if (!empty($brand['logo']))
-                                        <img src="{{ config('app.be_api_url') }}/storage/{{ $brand['logo'] }}"
-                                            alt="{{ $brand['name'] }}">
+                                    @if (!empty($brand['logo_url']))
+                                        <img src="{{ $brand['logo_url'] }}" alt="{{ $brand['name'] }}">
                                     @else
                                         <img src="{{ asset('img/brands/default.png') }}" alt="{{ $brand['name'] }}">
                                     @endif
