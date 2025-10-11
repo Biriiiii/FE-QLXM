@@ -1,7 +1,9 @@
 @extends('layouts.client')
 
 @section('title', 'Về Chúng Tôi - QLXM')
-@section('description', 'Tìm hiểu về QLXM - Hệ thống quản lý xe máy hàng đầu Việt Nam với đội ngũ chuyên nghiệp và dịch vụ tận tâm')
+@section('description',
+    'Tìm hiểu về QLXM - Hệ thống quản lý xe máy hàng đầu Việt Nam với đội ngũ chuyên nghiệp và dịch
+    vụ tận tâm')
 
 @section('content')
     <!-- Page Heading -->
@@ -35,13 +37,62 @@
                 <div class="col-md-6">
                     <div class="left-content">
                         <h4>Chúng tôi là ai &amp; Chúng tôi làm gì?</h4>
-                        <p>QLXM được thành lập với sứ mệnh mang đến cho khách hàng Việt Nam những chiếc xe máy chất lượng cao với giá cả hợp lý nhất. Với hơn 10 năm kinh nghiệm trong ngành, chúng tôi tự hào là đối tác tin cậy của các hãng xe máy hàng đầu thế giới.<br><br>Hệ thống QLXM không chỉ cung cấp xe máy mà còn mang đến dịch vụ bảo hành, bảo dưỡng và phụ kiện chính hãng. Chúng tôi cam kết luôn đặt lợi ích khách hàng lên hàng đầu.</p>
+                        <p>QLXM được thành lập với sứ mệnh mang đến cho khách hàng Việt Nam những chiếc xe máy chất lượng
+                            cao với giá cả hợp lý nhất. Với hơn 10 năm kinh nghiệm trong ngành, chúng tôi tự hào là đối tác
+                            tin cậy của các hãng xe máy hàng đầu thế giới.<br><br>Hệ thống QLXM không chỉ cung cấp xe máy mà
+                            còn mang đến dịch vụ bảo hành, bảo dưỡng và phụ kiện chính hãng. Chúng tôi cam kết luôn đặt lợi
+                            ích khách hàng lên hàng đầu.</p>
                         <ul class="social-icons">
                             <li><a href="#"><i class="fa fa-facebook"></i></a></li>
                             <li><a href="#"><i class="fa fa-twitter"></i></a></li>
                             <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
                             <li><a href="#"><i class="fa fa-behance"></i></a></li>
                         </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Founders Section -->
+    <div class="founders-section" style="background-color: #f8f9fa; padding: 60px 0;">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="section-heading">
+                        <h2>Người Sáng Lập</h2>
+                        <p>Những con người đã tạo nên thành công của QLXM ngày hôm nay</p>
+                    </div>
+                </div>
+                <div class="col-md-4 col-md-offset-2">
+                    <div class="founder-item text-center">
+                        <div class="founder-image" style="margin-bottom: 20px;">
+                            <img src="{{ asset('img/founder_01.jpg') }}" alt="Biriii"
+                                style="width: 200px; height: 200px; border-radius: 50%; object-fit: cover; margin: 0 auto; display: block;">
+                        </div>
+                        <div class="founder-content">
+                            <h3 style="color: #333; margin-bottom: 10px;">Biriii</h3>
+                            <h5 style="color: #007bff; margin-bottom: 15px;">Đồng Sáng Lập & Chủ Tịch HĐQT</h5>
+                            <p style="color: #666; line-height: 1.6;">Với tầm nhìn xa và kinh nghiệm sâu rộng trong ngành xe
+                                máy, anh Biriii đã dẫn dắt QLXM từ những ngày đầu thành lập đến thành một trong những hệ
+                                thống
+                                phân phối xe máy hàng đầu Việt Nam.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="founder-item text-center">
+                        <div class="founder-image" style="margin-bottom: 20px;">
+                            <img src="{{ asset('img/founder_02.jpg') }}" alt="Phước Otaku"
+                                style="width: 200px; height: 200px; border-radius: 50%; object-fit: cover; margin: 0 auto; display: block;">
+                        </div>
+                        <div class="founder-content">
+                            <h3 style="color: #333; margin-bottom: 10px;">Phước Otaku</h3>
+                            <h5 style="color: #007bff; margin-bottom: 15px;">Đồng Sáng Lập & Tổng Giám Đốc</h5>
+                            <p style="color: #666; line-height: 1.6;">Anh Phước là chuyên gia về quản lý vận hành và phát
+                                triển kinh doanh. Nhờ sự tận tâm và chiến lược kinh doanh hiệu quả, QLXM đã mở rộng mạng
+                                lưới trên toàn quốc và giành được lòng tin của hàng triệu khách hàng.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -60,7 +111,7 @@
                 <div class="col-md-4">
                     <div class="team-member">
                         <div class="thumb-container">
-                            <img src="{{ asset('img/team_01.jpg') }}" alt="Nguyễn Văn An">
+                            <img src="{{ asset('img/founder_01.jpg') }}" alt="Biriii">
                             <div class="hover-effect">
                                 <div class="hover-content">
                                     <ul class="social-icons">
@@ -73,16 +124,17 @@
                             </div>
                         </div>
                         <div class="down-content">
-                            <h4>Nguyễn Văn An</h4>
-                            <span>Giám Đốc Điều Hành</span>
-                            <p>Với 15 năm kinh nghiệm trong ngành xe máy, anh An là người đã xây dựng nên thương hiệu QLXM.</p>
+                            <h4>Biriii</h4>
+                            <span>Đồng Sáng Lập & Chủ Tịch HĐQT</span>
+                            <p>Người sáng lập với tầm nhìn chiến lược, đã xây dựng QLXM thành thương hiệu uy tín trong ngành
+                                xe máy Việt Nam.</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="team-member">
                         <div class="thumb-container">
-                            <img src="{{ asset('img/team_02.jpg') }}" alt="Trần Thị Bình">
+                            <img src="{{ asset('img/founder_02.jpg') }}" alt="Phước Otaku">
                             <div class="hover-effect">
                                 <div class="hover-content">
                                     <ul class="social-icons">
@@ -95,97 +147,9 @@
                             </div>
                         </div>
                         <div class="down-content">
-                            <h4>Trần Thị Bình</h4>
-                            <span>Chuyên Gia Sản Phẩm</span>
-                            <p>Chị Bình có kiến thức sâu rộng về các dòng xe máy và luôn tư vấn tận tâm cho khách hàng.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="team-member">
-                        <div class="thumb-container">
-                            <img src="{{ asset('img/team_03.jpg') }}" alt="Lê Văn Cường">
-                            <div class="hover-effect">
-                                <div class="hover-content">
-                                    <ul class="social-icons">
-                                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-behance"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="down-content">
-                            <h4>Lê Văn Cường</h4>
-                            <span>Trưởng Phòng Marketing</span>
-                            <p>Anh Cường chịu trách nhiệm xây dựng thương hiệu và phát triển mối quan hệ khách hàng.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="team-member">
-                        <div class="thumb-container">
-                            <img src="{{ asset('img/team_04.jpg') }}" alt="Phạm Thị Diệu">
-                            <div class="hover-effect">
-                                <div class="hover-content">
-                                    <ul class="social-icons">
-                                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-behance"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="down-content">
-                            <h4>Phạm Thị Diệu</h4>
-                            <span>Chuyên Viên Bán Hàng</span>
-                            <p>Chị Diệu có nhiều năm kinh nghiệm tư vấn và hỗ trợ khách hàng chọn xe phù hợp.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="team-member">
-                        <div class="thumb-container">
-                            <img src="{{ asset('img/team_05.jpg') }}" alt="Hoàng Văn Em">
-                            <div class="hover-effect">
-                                <div class="hover-content">
-                                    <ul class="social-icons">
-                                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-behance"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="down-content">
-                            <h4>Hoàng Văn Em</h4>
-                            <span>Kỹ Thuật Viên</span>
-                            <p>Anh Em là chuyên gia về bảo dưỡng và sửa chữa xe máy với hơn 10 năm kinh nghiệm.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="team-member">
-                        <div class="thumb-container">
-                            <img src="{{ asset('img/team_06.jpg') }}" alt="Võ Thị Phương">
-                            <div class="hover-effect">
-                                <div class="hover-content">
-                                    <ul class="social-icons">
-                                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-behance"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="down-content">
-                            <h4>Võ Thị Phương</h4>
-                            <span>Quản Lý Showroom</span>
-                            <p>Chị Phương quản lý hoạt động showroom và đảm bảo dịch vụ khách hàng tốt nhất.</p>
+                            <h4>Lang</h4>
+                            <span>Đồng Sáng Lập & Tổng Giám Đốc</span>
+                            <p>Chuyên gia quản lý vận hành, dẫn dắt QLXM phát triển mạng lưới showroom trên toàn quốc.</p>
                         </div>
                     </div>
                 </div>
@@ -204,7 +168,8 @@
                         </div>
                         <div class="down-content">
                             <h4>Quản Lý Sản Phẩm</h4>
-                            <p>Hệ thống quản lý kho xe máy hiện đại, đảm bảo luôn có sẵn các dòng xe hot nhất thị trường.</p>
+                            <p>Hệ thống quản lý kho xe máy hiện đại, đảm bảo luôn có sẵn các dòng xe hot nhất thị trường.
+                            </p>
                             <a href="#" class="filled-button">Tìm Hiểu Thêm</a>
                         </div>
                     </div>
