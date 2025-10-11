@@ -41,8 +41,8 @@ class HomeController extends Controller
 
                 // Thêm image_url cho mỗi sản phẩm
                 foreach ($products as &$product) {
-                    $product['image_url'] = !empty($product['image'])
-                        ? $this->apiUrl . '/storage/' . $product['image']
+                    $product['image_url'] = !empty($product['image_url'])
+                        ? $product['image_url']
                         : null;
                 }
 

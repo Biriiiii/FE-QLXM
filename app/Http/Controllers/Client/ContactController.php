@@ -35,7 +35,7 @@ class ContactController extends Controller
 
         // Logic để xử lý form liên hệ
         // Có thể lưu vào database hoặc gửi email
-        
+
         return back()->with('success', 'Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong thời gian sớm nhất.');
     }
 }

@@ -52,8 +52,8 @@ class MotorcycleController extends Controller
 
                 // Thêm image_url cho mỗi sản phẩm
                 foreach ($products as &$product) {
-                    $product['image_url'] = !empty($product['image'])
-                        ? $this->apiUrl . '/storage/' . $product['image']
+                    $product['image_url'] = !empty($product['image_url'])
+                        ? $product['image_url']
                         : null;
                 }
 
@@ -118,8 +118,8 @@ class MotorcycleController extends Controller
 
                 if ($product) {
                     // Thêm image_url
-                    $product['image_url'] = !empty($product['image'])
-                        ? $this->apiUrl . '/storage/' . $product['image']
+                    $product['image_url'] = !empty($product['image_url'])
+                        ? $product['image_url']
                         : null;
 
                     // Lấy sản phẩm liên quan (cùng brand hoặc category)
@@ -313,8 +313,8 @@ class MotorcycleController extends Controller
 
                 // Thêm image_url cho các sản phẩm liên quan
                 foreach ($relatedProducts as &$relatedProduct) {
-                    $relatedProduct['image_url'] = !empty($relatedProduct['image'])
-                        ? $this->apiUrl . '/storage/' . $relatedProduct['image']
+                    $relatedProduct['image_url'] = !empty($relatedProduct['image_url'])
+                        ? $relatedProduct['image_url']
                         : null;
                 }
 

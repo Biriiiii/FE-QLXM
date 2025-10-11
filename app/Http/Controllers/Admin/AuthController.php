@@ -18,7 +18,7 @@ class AuthController extends Controller
     // Xử lý đăng nhập qua API BE
     public function login(Request $request)
     {
-        $apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
+        $apiUrl = config('app.be_api_url', ' app.com/');
         $response = Http::post($apiUrl . '/api/auth/login', [
             'email' => $request->input('email'),
             'password' => $request->input('password'),

@@ -53,8 +53,8 @@ class ProductController extends Controller
             $paginationLinks = $responseData['links'] ?? [];
 
             foreach ($products as &$product) {
-                if (empty($product['image_url']) && !empty($product['image'])) {
-                    $product['image_url'] = $this->apiUrl . '/storage/' . $product['image'];
+                if (empty($product['image_url']) && !empty($product['image_url'])) {
+                    $product['image_url'] = $product['image_url'];
                 }
             }
 
@@ -128,8 +128,8 @@ class ProductController extends Controller
         $product = $response->json('data') ?? $response->json();
 
         // Thêm image_url từ backend
-        if (!empty($product['image'])) {
-            $product['image_url'] = $this->apiUrl . '/storage/' . $product['image'];
+        if (!empty($product['image_url'])) {
+            $product['image_url'] = $product['image_url'];
         }
 
         return view('admin.products.show', compact('product'));

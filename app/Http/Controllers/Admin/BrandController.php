@@ -37,6 +37,7 @@ class BrandController extends Controller
 
             $responseData = $response->json();
             $brands = $responseData['data'] ?? [];
+            // Không cần xử lý gì thêm, chỉ sử dụng trực tiếp trường logo_url từ BE
             $pagination = $responseData['meta'] ?? [];
             $paginationLinks = $responseData['links'] ?? [];
 
@@ -89,6 +90,7 @@ class BrandController extends Controller
         $response = Http::withToken($token)->get($apiUrl . "/api/brands/{$id}");
         $json = $response->json();
         $brand = isset($json['data']) ? $json['data'] : [];
+        // Không cần xử lý gì thêm, chỉ sử dụng trực tiếp trường logo_url từ BE
         return view('admin.brands.edit', compact('brand'));
     }
 
