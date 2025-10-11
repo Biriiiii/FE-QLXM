@@ -63,16 +63,14 @@
                                     @endif
                                 </a>
                                 <div class="down-content">
-
-                                    @if (isset($product['brand']['name']))
-                                        <div class="mb-1"><span
-                                                class="badge bg-primary">{{ $product['brand']['name'] }}</span></div>
-                                    @endif
                                     <a href="{{ route('client.motorcycles.show', $product['id']) }}">
                                         <h4>{{ $product['name'] }}</h4>
                                     </a>
-                                    <h6 class="text-danger fw-bold">{{ number_format($product['price'], 0, ',', '.') }} VNĐ
-                                    </h6>
+                                    <h6>{{ number_format($product['price'], 0, ',', '.') }} VNĐ</h6>
+
+                                    @if (isset($product['brand']['name']))
+                                        <p><strong>Hãng:</strong> {{ $product['brand']['name'] }}</p>
+                                    @endif
 
                                     @if (isset($product['category']['name']))
                                         <p><strong>Loại:</strong> {{ $product['category']['name'] }}</p>
