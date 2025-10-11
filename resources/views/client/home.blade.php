@@ -71,13 +71,9 @@
                                                 class="fa fa-cart-plus"></i> Thêm vào giỏ hàng</button>
                                     </form>
                                     <a href="{{ route('client.motorcycles.show', $product['id']) }}">
-                                        <h4 class="mb-1">{{ $product['name'] }}</h4>
+                                        <h4>{{ $product['name'] }}</h4>
                                     </a>
-                                    <div class="mb-2">
-                                        <span class="fw-bold text-danger"
-                                            style="font-size: 1.1rem;">{{ number_format($product['price'], 0, ',', '.') }}
-                                            VNĐ</span>
-                                    </div>
+                                    <h6>{{ number_format($product['price'], 0, ',', '.') }} VNĐ</h6>
 
                                     @if (isset($product['brand']['name']))
                                         <p><strong>Hãng:</strong> {{ $product['brand']['name'] }}</p>
