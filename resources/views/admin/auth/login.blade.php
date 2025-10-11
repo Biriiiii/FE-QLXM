@@ -32,12 +32,13 @@
         <div class="form-group">
             <label for="email" class="form-label">Địa chỉ Email</label>
             <input type="email" name="email" id="email" class="form-control" placeholder="Nhập email của bạn"
-                required autofocus value="{{ old('email') }}">
+                required autofocus value="{{ old('email', 'admin@qlxm.vn') }}">
         </div>
 
         <div class="form-group">
             <label for="password" class="form-label">Mật khẩu</label>
-            <input type="password" name="password" id="password" class="form-control" placeholder="Nhập mật khẩu" required>
+            <input type="password" name="password" id="password" class="form-control" placeholder="Nhập mật khẩu" required
+                value="admin123">
         </div>
 
         <div class="form-check">

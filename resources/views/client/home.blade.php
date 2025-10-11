@@ -63,10 +63,21 @@
                                     @endif
                                 </a>
                                 <div class="down-content">
+                                    <form action="{{ route('client.cart.add', $product['id']) }}" method="POST"
+                                        class="mb-2">
+                                        @csrf
+                                        <input type="hidden" name="product_id" value="{{ $product['id'] }}">
+                                        <button type="submit" class="btn btn-sm btn-success w-100"><i
+                                                class="fa fa-cart-plus"></i> Thêm vào giỏ hàng</button>
+                                    </form>
                                     <a href="{{ route('client.motorcycles.show', $product['id']) }}">
-                                        <h4>{{ $product['name'] }}</h4>
+                                        <h4 class="mb-1">{{ $product['name'] }}</h4>
                                     </a>
-                                    <h6>{{ number_format($product['price'], 0, ',', '.') }} VNĐ</h6>
+                                    <div class="mb-2">
+                                        <span class="fw-bold text-danger"
+                                            style="font-size: 1.1rem;">{{ number_format($product['price'], 0, ',', '.') }}
+                                            VNĐ</span>
+                                    </div>
 
                                     @if (isset($product['brand']['name']))
                                         <p><strong>Hãng:</strong> {{ $product['brand']['name'] }}</p>
