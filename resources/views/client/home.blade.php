@@ -63,13 +63,6 @@
                                     @endif
                                 </a>
                                 <div class="down-content">
-                                    <form action="{{ route('client.cart.add', $product['id']) }}" method="POST"
-                                        class="mb-2">
-                                        @csrf
-                                        <input type="hidden" name="product_id" value="{{ $product['id'] }}">
-                                        <button type="submit" class="btn btn-sm btn-success w-100"><i
-                                                class="fa fa-cart-plus"></i> Thêm vào giỏ hàng</button>
-                                    </form>
                                     <a href="{{ route('client.motorcycles.show', $product['id']) }}">
                                         <h4>{{ $product['name'] }}</h4>
                                     </a>
