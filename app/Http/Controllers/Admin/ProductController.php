@@ -79,8 +79,16 @@ class ProductController extends Controller
         }
 
         $brands = Http::withToken($this->token)->get($this->apiUrl . '/api/brands')->json('data') ?? [];
-        $categories = Http::withToken($this->token)->get($this->apiUrl . '/api/categories')->json('data') ?? [];
-
+        $catRes = Http::withToken($this->token)->get($this->apiUrl . '/api/categories');
+        $catJson = $catRes->json();
+        if (isset($catJson['data'])) {
+            $catData = $catJson['data'];
+        } elseif (is_array($catJson) && isset($catJson[0]['id'])) {
+            $catData = $catJson;
+        } else {
+            $catData = [];
+        }
+        $categories = is_array($catData) && array_keys($catData) === range(0, count($catData) - 1) ? $catData : (empty($catData) ? [] : [$catData]);
         return view('admin.products.create', compact('brands', 'categories'));
     }
 
@@ -153,8 +161,16 @@ class ProductController extends Controller
         $product = $response->json('data') ?? $response->json();
 
         $brands = Http::withToken($this->token)->get($this->apiUrl . '/api/brands')->json('data') ?? [];
-        $categories = Http::withToken($this->token)->get($this->apiUrl . '/api/categories')->json('data') ?? [];
-
+        $catRes = Http::withToken($this->token)->get($this->apiUrl . '/api/categories');
+        $catJson = $catRes->json();
+        if (isset($catJson['data'])) {
+            $catData = $catJson['data'];
+        } elseif (is_array($catJson) && isset($catJson[0]['id'])) {
+            $catData = $catJson;
+        } else {
+            $catData = [];
+        }
+        $categories = is_array($catData) && array_keys($catData) === range(0, count($catData) - 1) ? $catData : (empty($catData) ? [] : [$catData]);
         return view('admin.products.edit', compact('product', 'brands', 'categories'));
     }
 
