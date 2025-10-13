@@ -18,7 +18,20 @@ class CategoryController extends Controller
         $token = session('admin_token');
         $response = Http::withToken($token)->get($apiUrl . '/api/categories');
         $data = $response->json('data') ?? [];
-        $categories = is_array($data) && array_keys($data) === range(0, count($data) - 1) ? $data : (empty($data) ? [] : [$data]);
+        if (empty($data)) {
+            // Dữ liệu giả nếu API trả về rỗng
+            $categories = [
+                [
+                    'id' => '-',
+                    'name' => '---',
+                    'description' => '---',
+                    'created_at' => '-',
+                    'updated_at' => '-',
+                ]
+            ];
+        } else {
+            $categories = is_array($data) && array_keys($data) === range(0, count($data) - 1) ? $data : [$data];
+        }
         return view('admin.categories.index', compact('categories'));
     }
 
