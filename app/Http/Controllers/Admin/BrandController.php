@@ -8,6 +8,28 @@ use Illuminate\Http\Request;
 
 class BrandController extends Controller
 {
+    // Cập nhật logo brand riêng biệt
+    public function updateLogo(Request $request, $id)
+    {
+        if (!session('admin_token')) {
+            return redirect()->route('admin.auth.login');
+        }
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
+        $token = session('admin_token');
+        if (!$request->hasFile('logo')) {
+            return back()->withErrors('Vui lòng chọn file logo.');
+        }
+        $http = Http::withToken($token)->attach(
+            'logo',
+            fopen($request->file('logo')->getRealPath(), 'r'),
+            $request->file('logo')->getClientOriginalName()
+        );
+        $response = $http->post($apiUrl . "/api/brands/{$id}/logo");
+        if ($response->successful()) {
+            return redirect()->route('admin.brands.edit', $id)->with('success', 'Cập nhật logo thành công');
+        }
+        return back()->withErrors('Lỗi khi cập nhật logo');
+    }
     // Danh sách brands
     public function index(Request $request)
     {
