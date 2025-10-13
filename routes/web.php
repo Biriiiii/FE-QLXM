@@ -62,8 +62,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::resource('brands', BrandController::class);
     // Route cập nhật logo riêng biệt
-    Route::post('brands/{id}/logo', [BrandController::class, 'updateLogo'])->name('brands.updateLogo');
-    // Route cập nhật logo riêng biệt
     Route::resource('categories', CategoryController::class);
     Route::resource('products', ProductController::class);
     Route::resource('customers', CustomerController::class);
