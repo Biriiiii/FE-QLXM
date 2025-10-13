@@ -21,10 +21,19 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($categories as $index => $category)
+                        @php
+                            $catList = [];
+                            if (is_array($categories)) {
+                                $catList = $categories;
+                            } elseif (is_array($categories) || is_object($categories)) {
+                                // Nếu là object đơn lẻ (1 category)
+                                $catList = [$categories];
+                            }
+                        @endphp
+                        @forelse ($catList as $index => $category)
                             <tr style="border-bottom:1px solid #23262f;">
-                                <td>{{ $index + 1 }}</td>
-                                <td>{{ $category['name'] }}</td>
+                                <td>{{ $category['id'] ?? $index + 1 }}</td>
+                                <td>{{ $category['name'] ?? '-' }}</td>
                                 <td>{{ $category['description'] ?? '-' }}</td>
                                 <td>{{ $category['created_at'] ?? '-' }}</td>
                                 <td>{{ $category['updated_at'] ?? '-' }}</td>
@@ -39,12 +48,11 @@
                                     </form>
                                 </td>
                             </tr>
-                        @endforeach
-                        @if (empty($categories))
+                        @empty
                             <tr>
                                 <td colspan="6">Không có danh mục nào.</td>
                             </tr>
-                        @endif
+                        @endforelse
                     </tbody>
                 </table>
             </div>
