@@ -9,6 +9,7 @@
         <form action="{{ route('admin.brands.update', $brand['id']) }}" method="POST" enctype="multipart/form-data"
             class="card p-4 mb-4" style="background:#23262f; color:#eaeaea; border-radius:1rem;">
             @csrf
+            @method('PUT')
             <div class="mb-3">
                 <label for="name" class="form-label">Tên thương hiệu</label>
                 <input type="text" name="name" id="name" class="form-control" value="{{ $brand['name'] ?? '' }}"
