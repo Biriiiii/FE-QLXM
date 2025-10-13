@@ -17,7 +17,15 @@ class CategoryController extends Controller
         $apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
         $token = session('admin_token');
         $response = Http::withToken($token)->get($apiUrl . '/api/categories');
-        $data = $response->json('data') ?? [];
+        $json = $response->json();
+        if (isset($json['data'])) {
+            $data = $json['data'];
+        } elseif (is_array($json) && isset($json[0]['id'])) {
+            // Trường hợp trả về mảng gốc
+            $data = $json;
+        } else {
+            $data = [];
+        }
         $categories = is_array($data) && array_keys($data) === range(0, count($data) - 1) ? $data : (empty($data) ? [] : [$data]);
         return view('admin.categories.index', compact('categories'));
     }
