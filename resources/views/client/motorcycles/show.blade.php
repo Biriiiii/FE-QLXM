@@ -1,8 +1,12 @@
 @extends('layouts.client')
 
-@section('title', isset($product) ? $product['name'] . ' - Chi tiết xe máy - QLXM' : 'Chi tiết xe máy - QLXM')
-@section('description', isset($product) ? 'Chi tiết xe máy ' . $product['name'] . ' giá ' .
-    number_format($product['price'], 0, ',', '.') . ' VNĐ' : 'Xem chi tiết thông tin xe máy')
+@section('title', isset($product['name']) ? $product['name'] . ' - Chi tiết xe máy - QLXM' : 'Chi tiết xe máy - QLXM')
+@section('description',
+    isset($product['name'])
+    ? 'Chi tiết xe máy ' . $product['name'] . ' giá ' . (isset($product['price']) ? number_format($product['price'], 0, ',',
+    '.') : '0') . ' VNĐ'
+    : 'Xem chi tiết thông tin xe
+    máy')
 
 @section('content')
     <!-- Page Heading -->
@@ -30,7 +34,7 @@
                             <p>Vui lòng thử lại sau hoặc quay về <a href="{{ route('client.motorcycles') }}">danh sách xe
                                     máy</a>.</p>
                         </div>
-                    @elseif($product)
+                    @elseif(!empty($product) && isset($product['name']))
                         <div class="section-heading">
                             <div class="line-dec"></div>
                             <h1>{{ $product['name'] }}</h1>
@@ -44,14 +48,16 @@
                     @endif
                 </div>
 
-                @if ($product)
+                @if (!empty($product) && isset($product['id']))
                     <!-- Product Image -->
                     <div class="col-md-6">
                         <div class="product-image">
-                            @if ($product['image_url'])
-                                <img src="{{ $product['image_url'] }}" alt="{{ $product['name'] }}" class="img-fluid">
+                            @if (!empty($product['image_url']))
+                                <img src="{{ $product['image_url'] }}" alt="{{ $product['name'] ?? 'Xe máy' }}"
+                                    class="img-fluid">
                             @else
-                                <img src="{{ asset('img/product_01.jpg') }}" alt="{{ $product['name'] }}" class="img-fluid">
+                                <img src="{{ asset('img/product_01.jpg') }}" alt="{{ $product['name'] ?? 'Xe máy' }}"
+                                    class="img-fluid">
                             @endif
                         </div>
                     </div>
@@ -60,9 +66,10 @@
                     <div class="col-md-6">
                         <div class="product-content">
                             <!-- Nút Thêm vào giỏ hàng -->
-                            <form action="{{ route('client.cart.add', $product['id']) }}" method="POST" class="mb-3">
+                            <form action="{{ route('client.cart.add', $product['id'] ?? 0) }}" method="POST"
+                                class="mb-3">
                                 @csrf
-                                <input type="hidden" name="product_id" value="{{ $product['id'] }}">
+                                <input type="hidden" name="product_id" value="{{ $product['id'] ?? 0 }}">
                                 <button type="submit" class="btn btn-success">
                                     <i class="fa fa-cart-plus"></i> Thêm vào giỏ hàng
                                 </button>
@@ -77,12 +84,14 @@
                             </div>
 
                             <div class="price-section">
-                                <h3 class="current-price">{{ number_format($product['price'], 0, ',', '.') }} VNĐ</h3>
+                                <h3 class="current-price">
+                                    {{ isset($product['price']) ? number_format($product['price'], 0, ',', '.') : '0' }}
+                                    VNĐ</h3>
                             </div>
 
                             <div class="stock-info">
                                 <span class="stock-label">Tình trạng:</span>
-                                @if ($product['status'] == 'available')
+                                @if (isset($product['status']) && $product['status'] == 'available')
                                     <span class="in-stock">Còn hàng</span>
                                 @else
                                     <span class="out-of-stock">Hết hàng</span>
@@ -92,7 +101,7 @@
                                 @endif
                             </div>
 
-                            @if ($product['description'])
+                            @if (!empty($product['description']))
                                 <div class="product-description">
                                     <h4>Mô tả sản phẩm</h4>
                                     <p>{{ $product['description'] }}</p>
@@ -125,13 +134,14 @@
                                         max="{{ $product['stock'] ?? 10 }}" class="form-control quantity-input">
                                 </div>
 
-                                @if ($product['status'] == 'available')
+                                @if (isset($product['status']) && $product['status'] == 'available')
                                     <div class="action-buttons">
                                         <button class="btn btn-primary btn-add-cart"
-                                            data-product-id="{{ $product['id'] }}">
+                                            data-product-id="{{ $product['id'] ?? 0 }}">
                                             <i class="fa fa-shopping-cart"></i> Thêm vào giỏ hàng
                                         </button>
-                                        <button class="btn btn-success btn-buy-now" data-product-id="{{ $product['id'] }}">
+                                        <button class="btn btn-success btn-buy-now"
+                                            data-product-id="{{ $product['id'] ?? 0 }}">
                                             <i class="fa fa-credit-card"></i> Mua ngay
                                         </button>
                                     </div>
