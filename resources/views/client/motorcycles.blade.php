@@ -1,7 +1,8 @@
 @extends('layouts.client')
 
 @section('title', 'Danh Sách Xe Máy - QLXM')
-@section('description', 'Xem danh sách đầy đủ các dòng xe máy từ các hãng uy tín như Honda, Yamaha, Suzuki với giá cả
+@section('description',
+    'Xem danh sách đầy đủ các dòng xe máy từ các hãng uy tín như Honda, Yamaha, Suzuki với giá cả
     hợp lý')
 
 @section('content')
@@ -53,28 +54,30 @@
                 <div class="col-md-12">
                     <div class="filters-content">
                         <div class="row grid">
-                            @if (count($products) > 0)
+                            @if (!empty($products) && is_array($products))
                                 @foreach ($products as $product)
                                     <div
                                         class="col-lg-4 col-md-4 all 
                                         @if (isset($product['brand']['id'])) brand-{{ $product['brand']['id'] }} @endif
                                         @if (isset($product['category']['id'])) category-{{ $product['category']['id'] }} @endif">
                                         <div class="product-item">
-                                            <a href="{{ route('client.motorcycles.show', $product['id']) }}">
-                                                @if ($product['image_url'])
-                                                    <img src="{{ $product['image_url'] }}" alt="{{ $product['name'] }}"
+                                            <a href="{{ route('client.motorcycles.show', $product['id'] ?? 0) }}">
+                                                @if (!empty($product['image_url']))
+                                                    <img src="{{ $product['image_url'] }}"
+                                                        alt="{{ $product['name'] ?? 'Xe máy' }}"
                                                         style="width: 100%; height: 250px; object-fit: cover;">
                                                 @else
                                                     <img src="{{ asset('img/product_01.jpg') }}"
-                                                        alt="{{ $product['name'] }}"
+                                                        alt="{{ $product['name'] ?? 'Xe máy' }}"
                                                         style="width: 100%; height: 250px; object-fit: cover;">
                                                 @endif
                                             </a>
                                             <div class="down-content">
-                                                <a href="{{ route('client.motorcycles.show', $product['id']) }}">
-                                                    <h4>{{ $product['name'] }}</h4>
+                                                <a href="{{ route('client.motorcycles.show', $product['id'] ?? 0) }}">
+                                                    <h4>{{ $product['name'] ?? 'Không rõ tên' }}</h4>
                                                 </a>
-                                                <h6>{{ number_format($product['price'], 0, ',', '.') }} VNĐ</h6>
+                                                <h6>{{ isset($product['price']) ? number_format($product['price'], 0, ',', '.') : '0' }}
+                                                    VNĐ</h6>
 
                                                 @if (isset($product['brand']['name']))
                                                     <p><strong>Hãng:</strong> {{ $product['brand']['name'] }}</p>
@@ -93,8 +96,8 @@
                                                 </ul>
 
                                                 <span
-                                                    class="status {{ $product['status'] == 'available' ? 'text-success' : 'text-danger' }}">
-                                                    {{ $product['status'] == 'available' ? 'Còn hàng' : 'Hết hàng' }}
+                                                    class="status {{ isset($product['status']) && $product['status'] == 'available' ? 'text-success' : 'text-danger' }}">
+                                                    {{ isset($product['status']) && $product['status'] == 'available' ? 'Còn hàng' : 'Hết hàng' }}
                                                 </span>
                                             </div>
                                         </div>
@@ -117,7 +120,6 @@
             </div>
         </div>
     </div>
-
     <!-- Pagination -->
     @include('components.pagination')
 
