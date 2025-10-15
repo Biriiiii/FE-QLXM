@@ -123,5 +123,5 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    'be_api_url' => env('BE_API_URL', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/'),
+    'be_api_url' => env('BE_API_URL', 'https://be-qlxm-9b1bc6070adf.herokuapp.com'),
 ];
