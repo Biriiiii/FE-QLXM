@@ -25,33 +25,45 @@
                     <tbody>
                         @php $total = 0; @endphp
                         @foreach ($cart as $item)
-                            @php
-                                // Ở đây bạn cần lấy thông tin sản phẩm từ DB hoặc API, tạm thời chỉ hiển thị ID
-                                $productName = 'Sản phẩm #' . $item['product_id'];
-                                $price = 1000000; // TODO: Lấy giá thực tế
-                                $subtotal = $price * $item['quantity'];
-                                $total += $subtotal;
-                            @endphp
-                            <tr>
-                                <td>{{ $productName }}</td>
-                                <td>
-                                    <form action="{{ route('client.cart.update', $item['product_id']) }}" method="POST"
-                                        class="d-inline">
-                                        @csrf
-                                        <input type="number" name="quantity" value="{{ $item['quantity'] }}" min="1"
-                                            style="width:60px;">
-                                        <button type="submit" class="btn btn-sm btn-info">Cập nhật</button>
-                                    </form>
-                                </td>
-                                <td>{{ number_format($subtotal, 0, ',', '.') }} VNĐ</td>
-                                <td>
-                                    <form action="{{ route('client.cart.remove', $item['product_id']) }}" method="POST"
-                                        class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
-                                    </form>
-                                </td>
-                            </tr>
+                            @if (isset($item['product_id']) && isset($item['quantity']) && isset($productMap[$item['product_id']]))
+                                @php
+                                    $prod = $productMap[$item['product_id']];
+                                    $productName = $prod['name'] ?? 'Sản phẩm #' . $item['product_id'];
+                                    $price = isset($prod['price']) ? (float) $prod['price'] : 0;
+                                    $image = $prod['image_url'] ?? null;
+                                    $subtotal = $price * $item['quantity'];
+                                    $total += $subtotal;
+                                @endphp
+                                <tr>
+                                    <td>
+                                        @if ($image)
+                                            <img src="{{ $image }}" alt="{{ $productName }}"
+                                                style="width:60px;height:40px;object-fit:cover;margin-right:8px;">
+                                        @endif
+                                        <b>{{ $productName }}</b>
+                                        <br>
+                                        <span class="text-muted">ID: {{ $item['product_id'] }}</span>
+                                    </td>
+                                    <td>
+                                        <form action="{{ route('client.cart.update', $item['product_id']) }}" method="POST"
+                                            class="d-inline">
+                                            @csrf
+                                            <input type="number" name="quantity" value="{{ $item['quantity'] }}"
+                                                min="1" style="width:60px;">
+                                            <button type="submit" class="btn btn-sm btn-info">Cập nhật</button>
+                                        </form>
+                                    </td>
+                                    <td>{{ number_format($subtotal, 0, ',', '.') }} VNĐ<br><small class="text-muted">Đơn
+                                            giá: {{ number_format($price, 0, ',', '.') }} VNĐ</small></td>
+                                    <td>
+                                        <form action="{{ route('client.cart.remove', $item['product_id']) }}"
+                                            method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endif
                         @endforeach
                     </tbody>
                 </table>

@@ -47,7 +47,19 @@ class CartController extends Controller
     public function index()
     {
         $cart = Session::get('cart', []);
-        return view('client.order.cart', compact('cart'));
+        $productIds = collect($cart)->pluck('product_id')->all();
+        $products = [];
+        if (!empty($productIds)) {
+            $products = \App\Helpers\ProductHelper::getProductsByIds($productIds);
+        }
+        // Map product_id => product info for easy lookup
+        $productMap = [];
+        foreach ($products as $prod) {
+            if (isset($prod['id'])) {
+                $productMap[$prod['id']] = $prod;
+            }
+        }
+        return view('client.order.cart', compact('cart', 'productMap'));
     }
 
     // Thêm sản phẩm vào giỏ hàng
