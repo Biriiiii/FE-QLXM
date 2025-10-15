@@ -13,77 +13,76 @@ class HomeController extends Controller
 
     public function __construct()
     {
-        $this->apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
+        // URL backend từ .env hoặc fallback mặc định
+        $this->apiUrl = rtrim(config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/'), '/');
     }
 
     /**
-     * Display the home page.
+     * Trang chủ - hiển thị danh sách sản phẩm nổi bật hoặc mới nhất.
      */
     public function index(Request $request)
     {
         try {
-            // Call API lấy sản phẩm với phân trang
-            $response = Http::timeout(10)->get($this->apiUrl . '/api/client/products', [
+            // ======================== GỌI API SẢN PHẨM ========================
+            $response = Http::timeout(10)->get("{$this->apiUrl}/api/client/products", [
                 'page' => $request->get('page', 1),
-                'limit' => 5, // 5 sản phẩm mỗi trang
-                'featured' => true // Nếu backend có support featured products
+                'limit' => 8, // hiển thị 8 sản phẩm / trang
+                'sort' => 'newest', // sắp xếp sản phẩm mới nhất
             ]);
 
             $products = [];
-            $brands = [];
-            $categories = [];
             $pagination = null;
 
             if ($response->successful()) {
                 $data = $response->json();
+
                 $products = $data['data'] ?? [];
                 $pagination = $data['meta'] ?? null;
 
-                // Thêm image_url cho mỗi sản phẩm
+                // Chuẩn hóa image_url nếu null
                 foreach ($products as &$product) {
-                    $product['image_url'] = !empty($product['image_url'])
-                        ? $product['image_url']
-                        : null;
+                    $product['image'] = $product['image_url'] ?? asset('images/no-image.png');
                 }
 
-                Log::info('Home API Success: ' . count($products) . ' products loaded');
+                Log::info('[Home] Loaded ' . count($products) . ' products.');
             } else {
-                Log::error('Home API Error: ' . $response->status());
+                Log::error('[Home] API products error: ' . $response->status());
             }
 
-            // Call API lấy brands (optional)
+            // ======================== GỌI API HÃNG XE ========================
+            $brands = [];
             try {
-                $brandResponse = Http::timeout(5)->get($this->apiUrl . '/api/client/brands');
+                $brandResponse = Http::timeout(5)->get("{$this->apiUrl}/api/client/brands");
                 if ($brandResponse->successful()) {
-                    $brandData = $brandResponse->json();
-                    $brands = $brandData['data'] ?? [];
+                    $brands = $brandResponse->json('data') ?? [];
                 }
             } catch (\Exception $e) {
-                Log::warning('Brands API Error: ' . $e->getMessage());
+                Log::warning('[Home] Brands API failed: ' . $e->getMessage());
             }
 
-            // Call API lấy categories (optional)
+            // ======================== GỌI API LOẠI XE ========================
+            $categories = [];
             try {
-                $categoryResponse = Http::timeout(5)->get($this->apiUrl . '/api/client/categories');
-                if ($categoryResponse->successful()) {
-                    $categoryData = $categoryResponse->json();
-                    $categories = $categoryData['data'] ?? [];
+                $cateResponse = Http::timeout(5)->get("{$this->apiUrl}/api/client/categories");
+                if ($cateResponse->successful()) {
+                    $categories = $cateResponse->json('data') ?? [];
                 }
             } catch (\Exception $e) {
-                Log::warning('Categories API Error: ' . $e->getMessage());
+                Log::warning('[Home] Categories API failed: ' . $e->getMessage());
             }
 
+            // ======================== TRẢ VỀ VIEW ========================
             return view('client.home', compact('products', 'brands', 'categories', 'pagination'));
         } catch (\Exception $e) {
-            Log::error('Home Controller Error: ' . $e->getMessage());
+            Log::error('[Home] Controller Error: ' . $e->getMessage());
 
-            // Fallback - trả về view với dữ liệu rỗng
+            // Nếu lỗi thì trả về view trống
             return view('client.home', [
                 'products' => [],
                 'brands' => [],
                 'categories' => [],
                 'pagination' => null,
-                'error' => 'Không thể tải dữ liệu từ server'
+                'error' => 'Không thể tải dữ liệu từ server!'
             ]);
         }
     }
