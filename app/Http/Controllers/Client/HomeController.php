@@ -13,7 +13,7 @@ class HomeController extends Controller
 
     public function __construct()
     {
-        $this->apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
+        $this->apiUrl = config('app.be_api_url', 'http://127.0.0.1:8000');
     }
 
     /**
@@ -22,12 +22,41 @@ class HomeController extends Controller
     public function index(Request $request)
     {
         try {
-            // Call API lấy sản phẩm với phân trang
-            $response = Http::timeout(10)->get($this->apiUrl . '/api/client/products', [
+            // Lấy các tham số tìm kiếm từ request
+            $searchParams = [
                 'page' => $request->get('page', 1),
-                'limit' => 5, // 5 sản phẩm mỗi trang
-                'featured' => true // Nếu backend có support featured products
-            ]);
+                'limit' => 12, // Tăng số lượng sản phẩm khi có tìm kiếm
+            ];
+
+            // Thêm các tham số tìm kiếm nếu có
+            if ($request->filled('search')) {
+                $searchParams['search'] = $request->get('search');
+            }
+
+            if ($request->filled('brand')) {
+                $searchParams['brand_id'] = $request->get('brand');
+            }
+
+            if ($request->filled('category')) {
+                $searchParams['category_id'] = $request->get('category');
+            }
+
+            if ($request->filled('price_range')) {
+                $priceRange = explode('-', $request->get('price_range'));
+                if (count($priceRange) == 2) {
+                    $searchParams['min_price'] = $priceRange[0];
+                    $searchParams['max_price'] = $priceRange[1];
+                }
+            }
+
+            // Nếu không có tìm kiếm, chỉ lấy featured products
+            if (!$request->hasAny(['search', 'brand', 'category', 'price_range'])) {
+                $searchParams['featured'] = true;
+                $searchParams['limit'] = 6; // Giảm số lượng cho trang chủ
+            }
+
+            // Call API lấy sản phẩm
+            $response = Http::timeout(10)->get($this->apiUrl . '/api/client/products', $searchParams);
 
             $products = [];
             $brands = [];
@@ -41,8 +70,8 @@ class HomeController extends Controller
 
                 // Thêm image_url cho mỗi sản phẩm
                 foreach ($products as &$product) {
-                    $product['image_url'] = !empty($product['image_url'])
-                        ? $product['image_url']
+                    $product['image_url'] = !empty($product['image'])
+                        ? $this->apiUrl . '/storage/' . $product['image']
                         : null;
                 }
 
