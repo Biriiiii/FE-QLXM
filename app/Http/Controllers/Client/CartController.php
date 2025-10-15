@@ -69,9 +69,15 @@ class CartController extends Controller
     // Thêm sản phẩm vào giỏ hàng
     public function add(Request $request)
     {
-        $productId = $request->input('product_id');
-        $quantity = $request->input('quantity', 1);
+        $productId = $request->input('motocycle_id') ?? $request->input('product_id');
+        $quantity = max(1, (int)$request->input('quantity', 1));
+
+        if (!$productId) {
+            return redirect()->back()->with('error', 'Không tìm thấy sản phẩm để thêm vào giỏ hàng!');
+        }
+
         $cart = Session::get('cart', []);
+
         if (isset($cart[$productId])) {
             $cart[$productId]['quantity'] += $quantity;
         } else {
@@ -80,7 +86,9 @@ class CartController extends Controller
                 'quantity' => $quantity
             ];
         }
+
         Session::put('cart', $cart);
+
         return redirect()->route('client.cart.index')->with('success', 'Đã thêm vào giỏ hàng!');
     }
 
