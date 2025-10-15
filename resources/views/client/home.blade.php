@@ -1,92 +1,191 @@
-@extends('client.layout')
+@extends('layouts.client')
 
-@section('title', 'Trang chủ')
+@section('title', 'Trang Chủ - QLXM')
+@section('description', 'Hệ thống quản lý xe máy hiện đại, cung cấp thông tin về các dòng xe máy mới nhất')
 
 @section('content')
-    <div class="container mt-5">
-        {{-- ====================== PHẦN TIÊU ĐỀ & THANH TÌM KIẾM ====================== --}}
-        <div class="section-heading d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold">Xe Máy Mới Nhất</h2>
-
-            <form action="{{ route('client.motorcycles.search') }}" method="GET" class="d-flex" style="gap: 5px;">
-                <input type="text" name="keyword" class="form-control" placeholder="Tìm kiếm xe..."
-                    value="{{ request('keyword') }}" style="width: 250px;">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa fa-search"></i>
-                </button>
-            </form>
+    <!-- Banner Starts Here -->
+    <div class="banner header-text">
+        <div class="owl-banner owl-carousel">
+            <div class="banner-item-01">
+                <div class="text-content">
+                    <h4>Khuyến Mãi Đặc Biệt</h4>
+                    <h2>Xe Máy Mới Nhất</h2>
+                </div>
+            </div>
+            <div class="banner-item-02">
+                <div class="text-content">
+                    <h4>Ưu Đãi Flash</h4>
+                    <h2>Xe Máy Chất Lượng Cao</h2>
+                </div>
+            </div>
+            <div class="banner-item-03">
+                <div class="text-content">
+                    <h4>Phút Cuối</h4>
+                    <h2>Giảm Giá Sốc</h2>
+                </div>
+            </div>
         </div>
+    </div>
+    <!-- Banner Ends Here -->
 
-        {{-- ====================== KẾT QUẢ TÌM KIẾM ====================== --}}
-        @if (!empty(request('keyword')))
-            <h5 class="text-center mb-4 text-secondary">
-                Kết quả tìm kiếm cho: <strong>"{{ request('keyword') }}"</strong>
-            </h5>
-        @endif
+    <!-- Latest Motorcycles -->
+    <div class="latest-products">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="section-heading">
+                        <h2>Xe Máy Mới Nhất</h2>
+                        <a href="{{ route('client.motorcycles') }}">xem tất cả xe máy <i class="fa fa-angle-right"></i></a>
+                    </div>
+                </div>
 
-        {{-- ====================== DANH SÁCH XE MÁY ====================== --}}
-        <div class="row">
-            @forelse ($products as $product)
-                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                    <div class="card shadow-sm border-0 h-100">
-                        {{-- Ảnh sản phẩm --}}
-                        <a href="{{ route('client.motorcycles.show', $product['id']) }}">
-                            <img src="{{ $product['image'] ?? asset('images/no-image.png') }}" class="card-img-top"
-                                alt="{{ $product['name'] }}" style="height: 200px; object-fit: cover;">
-                        </a>
+                @if (isset($error))
+                    <div class="col-md-12">
+                        <div class="alert alert-warning text-center">
+                            <h4>{{ $error }}</h4>
+                            <p>Vui lòng thử lại sau hoặc liên hệ quản trị viên.</p>
+                        </div>
+                    </div>
+                @endif
 
-                        <div class="card-body d-flex flex-column justify-content-between">
-                            {{-- Tên sản phẩm --}}
-                            <h4 class="card-title product-title mb-2">
-                                <a href="{{ route('client.motorcycles.show', $product['id']) }}"
-                                    class="text-dark text-decoration-none">
-                                    {{ $product['name'] }}
+                @if (count($products) > 0)
+                    @foreach ($products as $product)
+                        <div class="col-md-4">
+                            <div class="product-item">
+                                <a href="{{ route('client.motorcycles.show', $product['id']) }}">
+                                    @if ($product['image_url'])
+                                        <img src="{{ $product['image_url'] }}" alt="{{ $product['name'] }}"
+                                            style="width: 100%; height: 250px; object-fit: cover;">
+                                    @else
+                                        <img src="{{ asset('img/product_01.jpg') }}" alt="{{ $product['name'] }}"
+                                            style="width: 100%; height: 250px; object-fit: cover;">
+                                    @endif
                                 </a>
-                            </h4>
+                                <div class="down-content">
+                                    <a href="{{ route('client.motorcycles.show', $product['id']) }}">
+                                        <h4>{{ $product['name'] }}</h4>
+                                    </a>
+                                    <h6>{{ number_format($product['price'], 0, ',', '.') }} VNĐ</h6>
 
-                            {{-- Giá sản phẩm --}}
-                            <p class="card-text text-danger fw-bold mb-2">
-                                {{ number_format($product['price'], 0, ',', '.') }} ₫
-                            </p>
+                                    @if (isset($product['brand']['name']))
+                                        <p><strong>Hãng:</strong> {{ $product['brand']['name'] }}</p>
+                                    @endif
 
-                            {{-- Nút thêm vào giỏ hàng --}}
-                            <form action="{{ route('client.cart.add') }}" method="POST">
-                                @csrf
-                                <input type="hidden" name="product_id" value="{{ $product['id'] }}">
-                                <button type="submit" class="btn btn-outline-primary w-100">
-                                    <i class="fa fa-cart-plus me-1"></i> Thêm vào giỏ hàng
-                                </button>
-                            </form>
+                                    @if (isset($product['category']['name']))
+                                        <p><strong>Loại:</strong> {{ $product['category']['name'] }}</p>
+                                    @endif
+
+                                    <ul class="stars">
+                                        <li><i class="fa fa-star"></i></li>
+                                        <li><i class="fa fa-star"></i></li>
+                                        <li><i class="fa fa-star"></i></li>
+                                        <li><i class="fa fa-star"></i></li>
+                                        <li><i class="fa fa-star"></i></li>
+                                    </ul>
+
+                                    <span
+                                        class="status {{ $product['status'] == 'available' ? 'text-success' : 'text-danger' }}">
+                                        {{ $product['status'] == 'available' ? 'Còn hàng' : 'Hết hàng' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                @else
+                    <div class="col-md-12">
+                        <div class="text-center py-5">
+                            <h4>Không có sản phẩm nào</h4>
+                            <p>Hiện tại chưa có xe máy nào để hiển thị.</p>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+    </div>
+
+    <!-- Pagination -->
+    @include('components.pagination')
+
+    <!-- Brands Section -->
+    @if (count($brands) > 0)
+        <div class="container mt-5">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="section-heading">
+                        <h2>Các Hãng Xe Máy</h2>
+                    </div>
+                </div>
+                @foreach ($brands as $brand)
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center">
+                            <h5>{{ $brand['name'] }}</h5>
+                            @if (isset($brand['country']))
+                                <p class="text-muted">{{ $brand['country'] }}</p>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    <!-- About Motorcycle Shop -->
+    <div class="best-features">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="section-heading">
+                        <h2>Về Cửa Hàng Xe Máy QLXM</h2>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="left-content">
+                        <h4>Tìm kiếm xe máy chất lượng cao?</h4>
+                        <p>QLXM là hệ thống quản lý xe máy hiện đại, cung cấp đầy đủ thông tin về các dòng xe máy từ các
+                            hãng uy tín như Honda, Yamaha, Suzuki. Chúng tôi cam kết mang đến cho khách hàng những sản phẩm
+                            chất lượng cao với giá cả hợp lý nhất.</p>
+                        <ul class="featured-list">
+                            <li><a href="#">Xe máy chính hãng 100%</a></li>
+                            <li><a href="#">Bảo hành toàn quốc</a></li>
+                            <li><a href="#">Hỗ trợ trả góp 0% lãi suất</a></li>
+                            <li><a href="#">Dịch vụ sau bán hàng tận tâm</a></li>
+                            <li><a href="#">Giao xe tận nhà miễn phí</a></li>
+                        </ul>
+                        <a href="{{ route('client.about') }}" class="filled-button">Tìm Hiểu Thêm</a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="right-image">
+                        <img src="{{ asset('img/feature-image.jpg') }}" alt="Cửa hàng xe máy">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="call-to-action">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="inner-content">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h4>Xe Máy Chất Lượng Cao &amp; <em>Giá Cả Hợp Lý</em></h4>
+                                <p>Hệ thống QLXM cung cấp đa dạng các dòng xe máy từ phổ thông đến cao cấp, phù hợp với mọi
+                                    nhu cầu.</p>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="{{ route('client.motorcycles') }}" class="filled-button">Xem Xe Máy</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            @empty
-                <div class="col-12 text-center">
-                    <p class="text-muted">Không tìm thấy sản phẩm nào.</p>
-                </div>
-            @endforelse
+            </div>
         </div>
     </div>
 @endsection
-
-{{-- ====================== CSS PHỤ TRỢ ====================== --}}
-@push('styles')
-    <style>
-        /* Giới hạn tiêu đề sản phẩm 2 dòng và thêm "..." nếu dài */
-        .product-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1a1a1a;
-            height: 48px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-
-        .product-title a:hover {
-            color: #007bff;
-        }
-    </style>
-@endpush
