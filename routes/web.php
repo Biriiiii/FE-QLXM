@@ -17,9 +17,18 @@ use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\MotorcycleController;
 use App\Http\Controllers\Client\AboutController;
 use App\Http\Controllers\Client\ContactController;
-use \App\Http\Controllers\Client\BrandClientController;
+use App\Http\Controllers\Client\BrandClientController;
+use App\Http\Controllers\Client\CartController;
 // Client Routes
 Route::name('client.')->group(function () {
+    // Đặt hàng (checkout)
+    Route::get('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
+    Route::post('/cart/checkout', [CartController::class, 'processCheckout'])->name('cart.processCheckout');
+    // Giỏ hàng
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
+    Route::post('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/motorcycles', [MotorcycleController::class, 'index'])->name('motorcycles');
     Route::get('/motorcycles/{id}', [MotorcycleController::class, 'show'])->name('motorcycles.show');

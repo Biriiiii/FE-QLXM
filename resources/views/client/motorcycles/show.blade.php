@@ -167,6 +167,55 @@
                                     <li><i class="fa fa-exchange"></i> Đổi trả trong 7 ngày</li>
                                 </ul>
                             </div>
+                            <!-- Modal Đặt hàng ngay -->
+                            <div class="modal fade" id="orderNowModal" tabindex="-1" role="dialog"
+                                aria-labelledby="orderNowModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="orderNowModalLabel">Đặt hàng ngay</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <form id="orderNowForm">
+                                            <div class="modal-body">
+                                                <div class="form-group">
+                                                    <label for="orderName">Họ tên</label>
+                                                    <input type="text" class="form-control" id="orderName"
+                                                        name="name" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="orderPhone">Số điện thoại</label>
+                                                    <input type="text" class="form-control" id="orderPhone"
+                                                        name="phone" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="orderAddress">Địa chỉ</label>
+                                                    <input type="text" class="form-control" id="orderAddress"
+                                                        name="address" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Sản phẩm</label>
+                                                    <input type="text" class="form-control"
+                                                        value="{{ $product['name'] ?? '' }}" readonly>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Số lượng</label>
+                                                    <input type="number" class="form-control" id="orderQuantity"
+                                                        name="quantity" value="1" min="1"
+                                                        max="{{ $product['stock'] ?? 10 }}" required>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-dismiss="modal">Đóng</button>
+                                                <button type="submit" class="btn btn-success">Xác nhận đặt hàng</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                 @endif
             </div>
@@ -190,7 +239,8 @@
                             <div class="product-item">
                                 <a href="{{ route('client.motorcycles.show', $relatedProduct['id']) }}">
                                     @if ($relatedProduct['image_url'])
-                                        <img src="{{ $relatedProduct['image_url'] }}" alt="{{ $relatedProduct['name'] }}">
+                                        <img src="{{ $relatedProduct['image_url'] }}"
+                                            alt="{{ $relatedProduct['name'] }}">
                                     @else
                                         <img src="{{ asset('img/product_0' . (($loop->index % 5) + 1) . '.jpg') }}"
                                             alt="{{ $relatedProduct['name'] }}">
@@ -434,12 +484,10 @@
                     var value = parseInt($(this).val());
                     var max = parseInt($(this).attr('max'));
                     var min = parseInt($(this).attr('min'));
-
                     if (value > max) {
                         $(this).val(max);
                         alert('Số lượng tối đa là ' + max);
                     }
-
                     if (value < min) {
                         $(this).val(min);
                     }
@@ -449,34 +497,29 @@
                 $('.btn-add-cart').on('click', function() {
                     var quantity = $('#quantity').val();
                     alert('Đã thêm ' + quantity + ' sản phẩm "' + productName + '" vào giỏ hàng!');
-
-                    // Here you would typically send an AJAX request to add the product to cart
-                    // Example:
-                    // $.ajax({
-                    //     url: '/cart/add',
-                    //     method: 'POST',
-                    //     data: {
-                    //         product_id: productId,
-                    //         quantity: quantity,
-                    //         _token: '{{ csrf_token() }}'
-                    //     },
-                    //     success: function(response) {
-                    //         // Handle success - update cart count, show message, etc.
-                    //         console.log('Product added to cart successfully');
-                    //     },
-                    //     error: function(xhr) {
-                    //         alert('Có lỗi xảy ra. Vui lòng thử lại!');
-                    //     }
-                    // });
+                    // AJAX thêm vào giỏ hàng ở đây nếu muốn
                 });
 
-                // Buy now button
-                $('.btn-buy-now').on('click', function() {
+                // Buy now button: mở modal đặt hàng
+                $('.btn-buy-now').on('click', function(e) {
+                    e.preventDefault();
                     var quantity = $('#quantity').val();
-                    alert('Chuyển đến trang thanh toán với ' + quantity + ' sản phẩm "' + productName + '"!');
+                    $('#orderQuantity').val(quantity);
+                    $('#orderNowModal').modal('show');
+                });
 
-                    // Here you would redirect to checkout page
-                    // window.location.href = '/checkout?product_id=' + productId + '&quantity=' + quantity;
+                // Submit form đặt hàng ngay
+                $('#orderNowForm').on('submit', function(e) {
+                    e.preventDefault();
+                    // Lấy dữ liệu form
+                    var name = $('#orderName').val();
+                    var phone = $('#orderPhone').val();
+                    var address = $('#orderAddress').val();
+                    var quantity = $('#orderQuantity').val();
+                    // Gửi AJAX đặt hàng hoặc chuyển trang checkout nếu muốn
+                    alert('Cảm ơn ' + name + ' đã đặt hàng! Số lượng: ' + quantity +
+                        '\nChúng tôi sẽ liên hệ: ' + phone);
+                    $('#orderNowModal').modal('hide');
                 });
 
                 // Product image zoom effect (optional)
