@@ -69,7 +69,7 @@ class CartController extends Controller
     // Thêm sản phẩm vào giỏ hàng
     public function add(Request $request)
     {
-        $productId = $request->input('motocycle_id') ?? $request->input('product_id');
+        $productId = $request->input('motorcycle_id') ?? $request->input('product_id');
         $quantity = max(1, (int)$request->input('quantity', 1));
 
         if (!$productId) {

@@ -7,70 +7,71 @@
             $hasProduct = false;
         @endphp
 
-        <form action="{{ route('client.cart.update', 0) }}" method="POST">
-            @csrf
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Sản phẩm</th>
-                        <th>Số lượng</th>
-                        <th>Thành tiền</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($cart as $item)
-                        @if (isset($item['product_id']) && isset($item['quantity']) && isset($productMap[$item['product_id']]))
-                            @php
-                                $hasProduct = true;
-                                $prod = $productMap[$item['product_id']];
-                                $productName = $prod['name'] ?? 'Sản phẩm #' . $item['product_id'];
-                                $price = isset($prod['price']) ? (float) $prod['price'] : 0;
-                                $image = $prod['image_url'] ?? null;
-                                $subtotal = $price * $item['quantity'];
-                                $total += $subtotal;
-                            @endphp
-                            <tr>
-                                <td>
-                                    @if ($image)
-                                        <img src="{{ $image }}" alt="{{ $productName }}"
-                                            style="width:60px;height:40px;object-fit:cover;margin-right:8px;">
-                                    @endif
-                                    <b>{{ $productName }}</b><br>
-                                    <span class="text-muted">ID: {{ $item['product_id'] }}</span>
-                                </td>
-                                <td>
-                                    <form action="{{ route('client.cart.update', $item['product_id']) }}" method="POST"
-                                        class="d-inline">
-                                        @csrf
-                                        <input type="number" name="quantity" value="{{ $item['quantity'] }}" min="1"
-                                            style="width:60px;">
-                                        <button type="submit" class="btn btn-sm btn-info">Cập nhật</button>
-                                    </form>
-                                </td>
-                                <td>
-                                    {{ number_format($subtotal, 0, ',', '.') }} VNĐ<br>
-                                    <small class="text-muted">Đơn giá: {{ number_format($price, 0, ',', '.') }} VNĐ</small>
-                                </td>
-                                <td>
-                                    <form action="{{ route('client.cart.remove', $item['product_id']) }}" method="POST"
-                                        class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @endif
-                    @endforeach
+        {{-- **ĐÃ XÓA FORM BAO QUANH BẢNG** --}}
 
-                    @if (!$hasProduct)
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th>Số lượng</th>
+                    <th>Thành tiền</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($cart as $item)
+                    @if (isset($item['product_id']) && isset($item['quantity']) && isset($productMap[$item['product_id']]))
+                        @php
+                            $hasProduct = true;
+                            $prod = $productMap[$item['product_id']];
+                            $productName = $prod['name'] ?? 'Sản phẩm #' . $item['product_id'];
+                            $price = isset($prod['price']) ? (float) $prod['price'] : 0;
+                            $image = $prod['image_url'] ?? null;
+                            $subtotal = $price * $item['quantity'];
+                            $total += $subtotal;
+                        @endphp
                         <tr>
-                            <td colspan="4" class="text-center text-muted">Giỏ hàng của bạn đang trống.</td>
+                            <td>
+                                @if ($image)
+                                    <img src="{{ $image }}" alt="{{ $productName }}"
+                                        style="width:60px;height:40px;object-fit:cover;margin-right:8px;">
+                                @endif
+                                <b>{{ $productName }}</b><br>
+                                <span class="text-muted">ID: {{ $item['product_id'] }}</span>
+                            </td>
+                            <td>
+                                {{-- Form Cập nhật cho từng sản phẩm (Đã giữ nguyên) --}}
+                                <form action="{{ route('client.cart.update', $item['product_id']) }}" method="POST"
+                                    class="d-inline">
+                                    @csrf
+                                    <input type="number" name="quantity" value="{{ $item['quantity'] }}" min="1"
+                                        style="width:60px;">
+                                    <button type="submit" class="btn btn-sm btn-info">Cập nhật</button>
+                                </form>
+                            </td>
+                            <td>
+                                {{ number_format($subtotal, 0, ',', '.') }} VNĐ<br>
+                                <small class="text-muted">Đơn giá: {{ number_format($price, 0, ',', '.') }} VNĐ</small>
+                            </td>
+                            <td>
+                                {{-- Form Xóa sản phẩm (Đã giữ nguyên) --}}
+                                <form action="{{ route('client.cart.remove', $item['product_id']) }}" method="POST"
+                                    class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                                </form>
+                            </td>
                         </tr>
                     @endif
-                </tbody>
-            </table>
-        </form>
+                @endforeach
+
+                @if (!$hasProduct)
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">Giỏ hàng của bạn đang trống.</td>
+                    </tr>
+                @endif
+            </tbody>
+        </table>
 
         <div class="text-right mt-4">
             <h4>Tổng tiền: {{ number_format($total, 0, ',', '.') }} VNĐ</h4>
@@ -84,7 +85,6 @@
         </div>
     </div>
 
-    <!-- Modal Đặt hàng -->
     <div class="modal fade" id="orderModal" tabindex="-1" role="dialog" aria-labelledby="orderModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -95,7 +95,9 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form id="cartOrderForm">
+                {{-- ĐÃ SỬA: Thêm action, method và @csrf --}}
+                <form id="cartOrderForm" action="{{ route('client.cart.processCheckout') }}" method="POST">
+                    @csrf
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="orderName">Họ tên</label>
@@ -104,6 +106,11 @@
                         <div class="form-group">
                             <label for="orderPhone">Số điện thoại</label>
                             <input type="text" class="form-control" id="orderPhone" name="phone" required>
+                        </div>
+                        {{-- ĐÃ THÊM: Trường Email --}}
+                        <div class="form-group">
+                            <label for="orderEmail">Email</label>
+                            <input type="email" class="form-control" id="orderEmail" name="email" required>
                         </div>
                         <div class="form-group">
                             <label for="orderAddress">Địa chỉ</label>
@@ -128,13 +135,13 @@
         </div>
     </div>
 
-    <!-- Danh sách đơn hàng đã đặt -->
     <div class="container mt-5" id="orderListContainer" style="display:none;">
         <h4>Đơn hàng của bạn</h4>
         <div id="orderList"></div>
     </div>
 
     <script>
+        // Các hàm quản lý Cookie (Đã giữ nguyên)
         function setCookie(name, value, days) {
             var expires = "";
             if (days) {
@@ -179,40 +186,19 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Logic mở Modal (Đã giữ nguyên)
             document.getElementById('openOrderModal').onclick = function() {
                 $('#orderModal').modal('show');
             };
 
-            document.getElementById('cartOrderForm').onsubmit = function(e) {
-                e.preventDefault();
-                var name = document.getElementById('orderName').value;
-                var phone = document.getElementById('orderPhone').value;
-                var address = document.getElementById('orderAddress').value;
-                var note = document.getElementById('orderNote').value;
-                var deposit = '{{ number_format($total * 0.3, 0, ',', '.') }} VNĐ';
-                var time = new Date().toLocaleString();
+            // **ĐÃ XÓA** hàm onsubmit JS. Form sẽ submit trực tiếp lên Laravel Controller.
+            // Nếu bạn cần lưu đơn hàng vào cookie sau khi Controller xử lý, bạn phải dùng AJAX.
+            // Với form submit thông thường, hãy để Controller thực hiện chuyển hướng sau khi đặt hàng thành công.
 
-                var order = {
-                    name,
-                    phone,
-                    address,
-                    note,
-                    deposit,
-                    time
-                };
-                var orders = [];
-                var old = getCookie('orders');
-                if (old) {
-                    try {
-                        orders = JSON.parse(old);
-                    } catch (e) {}
-                }
-                orders.push(order);
-                setCookie('orders', JSON.stringify(orders), 7);
-                alert('Đặt hàng thành công!');
-                $('#orderModal').modal('hide');
-                renderOrderList();
-            };
+            // Xử lý đơn hàng thành công bằng cách sử dụng Flash Message từ Laravel (nếu có)
+            @if (session('order_success'))
+                alert('{{ session('order_success') }}');
+            @endif
 
             renderOrderList();
         });
