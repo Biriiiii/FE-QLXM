@@ -91,9 +91,7 @@ class MotorcycleController extends Controller
             $apiEndpoint = $this->apiUrl . '/api/client/products/' . $id;
             Log::info('Trying to fetch product from: ' . $apiEndpoint);
 
-            // Call API lấy chi tiết sản phẩm
             $response = Http::timeout(10)->get($apiEndpoint);
-
             Log::info('API Response Status: ' . $response->status());
             Log::info('API Response Body: ' . $response->body());
 
@@ -104,32 +102,45 @@ class MotorcycleController extends Controller
                 $data = $response->json();
                 Log::info('Raw API response: ' . json_encode($data));
 
-                // Kiểm tra xem response có structure nào
-                if (isset($data['data'])) {
+                // Handle all possible API response structures
+                if (isset($data['data']) && is_array($data['data'])) {
                     $product = $data['data'];
+                } elseif (isset($data['data']) && is_object($data['data'])) {
+                    $product = (array)$data['data'];
                 } elseif (isset($data['id'])) {
-                    // Nếu response trực tiếp là object sản phẩm
+                    $product = $data;
+                } elseif (is_array($data) && !empty($data)) {
                     $product = $data;
                 } else {
                     $product = null;
                 }
 
+                // Ensure $product is an array
+                if ($product && !is_array($product)) {
+                    $product = (array)$product;
+                }
+
                 Log::info('Processed product data: ' . json_encode($product));
 
-                if ($product) {
-                    // Thêm image_url
+                if ($product && isset($product['id'])) {
+                    // Defensive: ensure all expected keys exist
                     $product['image_url'] = !empty($product['image_url'])
                         ? $product['image_url']
-                        : null;
+                        : (isset($product['image']) && $product['image'] ? $this->apiUrl . '/storage/' . $product['image'] : null);
+                    $product['brand'] = isset($product['brand']) && is_array($product['brand']) ? $product['brand'] : [];
+                    $product['category'] = isset($product['category']) && is_array($product['category']) ? $product['category'] : [];
+                    $product['specifications'] = isset($product['specifications']) && is_array($product['specifications']) ? $product['specifications'] : [];
+                    $product['description'] = $product['description'] ?? '';
+                    $product['status'] = $product['status'] ?? '';
+                    $product['stock'] = $product['stock'] ?? null;
+                    $product['price'] = $product['price'] ?? 0;
 
-                    // Lấy sản phẩm liên quan (cùng brand hoặc category)
+                    // Get related products
                     $relatedProducts = $this->getRelatedProducts($product);
-
                     Log::info('Product Detail API Success for ID: ' . $id);
-
                     return view('client.motorcycles.show', compact('product', 'relatedProducts'));
                 } else {
-                    Log::warning('Product data is null or empty');
+                    Log::warning('Product data is null, empty, or missing id');
                 }
             } else {
                 Log::error('Product Detail API Error for ID: ' . $id . ', Status: ' . $response->status());
