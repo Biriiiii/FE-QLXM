@@ -65,17 +65,11 @@
                     <!-- Product Info -->
                     <div class="col-md-6">
                         <div class="product-content">
-                            <!-- Nút Thêm vào giỏ hàng (chỉ giữ 1 nút, submit xong chuyển sang giỏ hàng) -->
-                            <form action="{{ route('client.cart.add', $product['id'] ?? 0) }}" method="POST" class="mb-3"
-                                id="addToCartForm">
+                            <!-- Nút Thêm vào giỏ hàng -->
+                            <form action="{{ route('client.cart.add', $product['id'] ?? 0) }}" method="POST"
+                                class="mb-3">
                                 @csrf
                                 <input type="hidden" name="product_id" value="{{ $product['id'] ?? 0 }}">
-                                <div class="quantity-section mb-2">
-                                    <label for="quantity">Số lượng:</label>
-                                    <input type="number" id="quantity" name="quantity" value="1" min="1"
-                                        max="{{ $product['stock'] ?? 10 }}" class="form-control quantity-input"
-                                        style="width:120px;display:inline-block;">
-                                </div>
                                 <button type="submit" class="btn btn-success">
                                     <i class="fa fa-cart-plus"></i> Thêm vào giỏ hàng
                                 </button>
@@ -134,7 +128,33 @@
                             @endif
 
                             <div class="product-actions">
-                                <!-- Đã chuyển input số lượng và nút thêm vào giỏ hàng lên form phía trên -->
+                                <div class="quantity-section">
+                                    <label for="quantity">Số lượng:</label>
+                                    <input type="number" id="quantity" value="1" min="1"
+                                        max="{{ $product['stock'] ?? 10 }}" class="form-control quantity-input">
+                                </div>
+
+                                @if (isset($product['status']) && $product['status'] == 'available')
+                                    <div class="action-buttons">
+                                        <button class="btn btn-primary btn-add-cart"
+                                            data-product-id="{{ $product['id'] ?? 0 }}">
+                                            <i class="fa fa-shopping-cart"></i> Thêm vào giỏ hàng
+                                        </button>
+                                        <button class="btn btn-success btn-buy-now"
+                                            data-product-id="{{ $product['id'] ?? 0 }}">
+                                            <i class="fa fa-credit-card"></i> Mua ngay
+                                        </button>
+                                    </div>
+                                @else
+                                    <div class="action-buttons">
+                                        <button class="btn btn-secondary" disabled>
+                                            <i class="fa fa-ban"></i> Hết hàng
+                                        </button>
+                                        <button class="btn btn-outline-primary">
+                                            <i class="fa fa-bell"></i> Thông báo khi có hàng
+                                        </button>
+                                    </div>
+                                @endif
                             </div>
 
                             <div class="product-features">
@@ -162,8 +182,8 @@
                                             <div class="modal-body">
                                                 <div class="form-group">
                                                     <label for="orderName">Họ tên</label>
-                                                    <input type="text" class="form-control" id="orderName" name="name"
-                                                        required>
+                                                    <input type="text" class="form-control" id="orderName"
+                                                        name="name" required>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="orderPhone">Số điện thoại</label>
@@ -455,90 +475,66 @@
     @if ($product)
         <script>
             $(document).ready(function() {
-                        var productId = {{ $product['id'] }};
-                        var productName = "{{ $product['name'] }}";
-                        var maxStock = {{ $product['stock'] ?? 10 }};
+                var productId = {{ $product['id'] }};
+                var productName = "{{ $product['name'] }}";
+                var maxStock = {{ $product['stock'] ?? 10 }};
 
-                        // Quantity input validation
-                        $('#quantity').on('change', function() {
-                            var value = parseInt($(this).val());
-                            var max = parseInt($(this).attr('max'));
-                            var min = parseInt($(this).attr('min'));
-                            if (value > max) {
-                                $(this).val(max);
-                                alert('Số lượng tối đa là ' + max);
-                            }
-                            if (value < min) {
-                                $(this).val(min);
-                            }
-                        });
+                // Quantity input validation
+                $('#quantity').on('change', function() {
+                    var value = parseInt($(this).val());
+                    var max = parseInt($(this).attr('max'));
+                    var min = parseInt($(this).attr('min'));
+                    if (value > max) {
+                        $(this).val(max);
+                        alert('Số lượng tối đa là ' + max);
+                    }
+                    if (value < min) {
+                        $(this).val(min);
+                    }
+                });
 
-                        // Add to cart button
-                        $('.btn-add-cart').on('click', function() {
-                            var quantity = $('#quantity').val();
-                            alert('Đã thêm ' + quantity + ' sản phẩm "' + productName + '" vào giỏ hàng!');
-                            // AJAX thêm vào giỏ hàng ở đây nếu muốn
-                        });
+                // Add to cart button
+                $('.btn-add-cart').on('click', function() {
+                    var quantity = $('#quantity').val();
+                    alert('Đã thêm ' + quantity + ' sản phẩm "' + productName + '" vào giỏ hàng!');
+                    // AJAX thêm vào giỏ hàng ở đây nếu muốn
+                });
 
-                        // Buy now button: mở modal đặt hàng
-                        $('.btn-buy-now').on('click', function(e) {
-                            e.preventDefault();
-                            var quantity = $('#quantity').val();
-                            $('#orderQuantity').val(quantity);
-                            $('#orderNowModal').modal('show');
-                        });
+                // Buy now button: mở modal đặt hàng
+                $('.btn-buy-now').on('click', function(e) {
+                    e.preventDefault();
+                    var quantity = $('#quantity').val();
+                    $('#orderQuantity').val(quantity);
+                    $('#orderNowModal').modal('show');
+                });
 
-                        // Submit form đặt hàng ngay
-                        $('#orderNowForm').on('submit', function(e) {
-                            e.preventDefault();
-                            // Lấy dữ liệu form
-                            var name = $('#orderName').val();
-                            var phone = $('#orderPhone').val();
-                            var address = $('#orderAddress').val();
-                            var quantity = $('#orderQuantity').val();
-                            // Gửi AJAX đặt hàng hoặc chuyển trang checkout nếu muốn
-                            alert('Cảm ơn ' + name + ' đã đặt hàng! Số lượng: ' + quantity +
-                                '\nChúng tôi sẽ liên hệ: ' + phone);
-                            $('#orderNowModal').modal('hide');
-                        });
+                // Submit form đặt hàng ngay
+                $('#orderNowForm').on('submit', function(e) {
+                    e.preventDefault();
+                    // Lấy dữ liệu form
+                    var name = $('#orderName').val();
+                    var phone = $('#orderPhone').val();
+                    var address = $('#orderAddress').val();
+                    var quantity = $('#orderQuantity').val();
+                    // Gửi AJAX đặt hàng hoặc chuyển trang checkout nếu muốn
+                    alert('Cảm ơn ' + name + ' đã đặt hàng! Số lượng: ' + quantity +
+                        '\nChúng tôi sẽ liên hệ: ' + phone);
+                    $('#orderNowModal').modal('hide');
+                });
 
-                        // Product image zoom effect (optional)
-                        $('.product-image img').on('mouseenter', function() {
-                                    <
-                                    script >
-                                        $(document).ready(function() {
-                                            var maxStock = {{ $product['stock'] ?? 10 }};
-                                            // Quantity input validation
-                                            $('#quantity').on('change', function() {
-                                                var value = parseInt($(this).val());
-                                                var max = parseInt($(this).attr('max'));
-                                                var min = parseInt($(this).attr('min'));
-                                                if (value > max) {
-                                                    $(this).val(max);
-                                                    alert('Số lượng tối đa là ' + max);
-                                                }
-                                                if (value < min) {
-                                                    $(this).val(min);
-                                                }
-                                            });
-                                            // Khi submit form thêm vào giỏ hàng, chuyển hướng sang trang giỏ hàng
-                                            $('#addToCartForm').on('submit', function() {
-                                                setTimeout(function() {
-                                                    window.location.href =
-                                                        "{{ route('client.cart.index') }}";
-                                                }, 100);
-                                            });
-                                            // Product image zoom effect (optional)
-                                            $('.product-image img').on('mouseenter', function() {
-                                                $(this).css({
-                                                    'transform': 'scale(1.05)',
-                                                    'transition': 'transform 0.3s ease'
-                                                });
-                                            }).on('mouseleave', function() {
-                                                $(this).css({
-                                                    'transform': 'scale(1)',
-                                                    'transition': 'transform 0.3s ease'
-                                                });
-                                            });
-                                        });
-                                @endsection
+                // Product image zoom effect (optional)
+                $('.product-image img').on('mouseenter', function() {
+                    $(this).css({
+                        'transform': 'scale(1.05)',
+                        'transition': 'transform 0.3s ease'
+                    });
+                }).on('mouseleave', function() {
+                    $(this).css({
+                        'transform': 'scale(1)',
+                        'transition': 'transform 0.3s ease'
+                    });
+                });
+            });
+        </script>
+    @endif
+@endsection
