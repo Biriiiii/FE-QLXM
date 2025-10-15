@@ -1,8 +1,11 @@
 @extends('layouts.client')
 
 @section('title', isset($product['name']) ? $product['name'] . ' - Chi tiết xe máy - QLXM' : 'Chi tiết xe máy - QLXM')
-@section('description', isset($product['name']) ? 'Chi tiết xe máy ' . $product['name'] . ' giá ' .
-    (isset($product['price']) ? number_format($product['price'], 0, ',', '.') : '0') . ' VNĐ' : 'Xem chi tiết thông tin xe
+@section('description',
+    isset($product['name'])
+    ? 'Chi tiết xe máy ' . $product['name'] . ' giá ' . (isset($product['price']) ? number_format($product['price'], 0, ',',
+    '.') : '0') . ' VNĐ'
+    : 'Xem chi tiết thông tin xe
     máy')
 
 @section('content')

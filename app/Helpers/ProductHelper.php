@@ -16,7 +16,7 @@ class ProductHelper
         if (empty($ids)) {
             return [];
         }
-        $apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
+        $apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com');
         try {
             $response = Http::get($apiUrl . '/api/products', ['ids' => implode(',', $ids)]);
             if ($response->successful()) {
