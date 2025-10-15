@@ -59,7 +59,11 @@ class CartController extends Controller
                 $productMap[$prod['id']] = $prod;
             }
         }
-        return view('client.order.cart', compact('cart', 'productMap'));
+        // Đảm bảo luôn truyền biến productMap (dù rỗng)
+        return view('client.order.cart', [
+            'cart' => $cart,
+            'productMap' => $productMap
+        ]);
     }
 
     // Thêm sản phẩm vào giỏ hàng
