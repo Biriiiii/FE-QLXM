@@ -29,114 +29,13 @@
     </div>
     <!-- Banner Ends Here -->
 
-    <!-- Search Section -->
-    <div class="search-section" style="background: #f8f9fa; padding: 40px 0;">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="search-box text-center">
-                        <h3 class="mb-4">Tìm Kiếm Xe Máy</h3>
-                        <form action="{{ route('client.home') }}" method="GET" class="search-form">
-                            <div class="row justify-content-center">
-                                <div class="col-md-3 mb-3">
-                                    <input type="text" name="search" class="form-control" placeholder="Tên xe máy..."
-                                        value="{{ request('search') }}" style="padding: 12px; border-radius: 25px;">
-                                </div>
-                                <div class="col-md-2 mb-3">
-                                    <select name="brand" class="form-control" style="padding: 12px; border-radius: 25px;">
-                                        <option value="">Tất cả hãng</option>
-                                        @if (isset($brands) && count($brands) > 0)
-                                            @foreach ($brands as $brand)
-                                                <option value="{{ $brand['id'] }}"
-                                                    {{ request('brand') == $brand['id'] ? 'selected' : '' }}>
-                                                    {{ $brand['name'] }}
-                                                </option>
-                                            @endforeach
-                                        @endif
-                                    </select>
-                                </div>
-                                <div class="col-md-2 mb-3">
-                                    <select name="category" class="form-control"
-                                        style="padding: 12px; border-radius: 25px;">
-                                        <option value="">Tất cả loại</option>
-                                        @if (isset($categories) && count($categories) > 0)
-                                            @foreach ($categories as $category)
-                                                <option value="{{ $category['id'] }}"
-                                                    {{ request('category') == $category['id'] ? 'selected' : '' }}>
-                                                    {{ $category['name'] }}
-                                                </option>
-                                            @endforeach
-                                        @endif
-                                    </select>
-                                </div>
-                                <div class="col-md-2 mb-3">
-                                    <select name="price_range" class="form-control"
-                                        style="padding: 12px; border-radius: 25px;">
-                                        <option value="">Tất cả giá</option>
-                                        <option value="0-30000000"
-                                            {{ request('price_range') == '0-30000000' ? 'selected' : '' }}>
-                                            Dưới 30 triệu
-                                        </option>
-                                        <option value="30000000-50000000"
-                                            {{ request('price_range') == '30000000-50000000' ? 'selected' : '' }}>
-                                            30-50 triệu
-                                        </option>
-                                        <option value="50000000-100000000"
-                                            {{ request('price_range') == '50000000-100000000' ? 'selected' : '' }}>
-                                            50-100 triệu
-                                        </option>
-                                        <option value="100000000-999999999"
-                                            {{ request('price_range') == '100000000-999999999' ? 'selected' : '' }}>
-                                            Trên 100 triệu
-                                        </option>
-                                    </select>
-                                </div>
-                                <div class="col-md-1 mb-3">
-                                    <button type="submit" class="btn btn-primary"
-                                        style="padding: 12px 20px; border-radius: 25px; width: 100%;">
-                                        <i class="fa fa-search"></i>
-                                    </button>
-                                </div>
-                                @if (request()->hasAny(['search', 'brand', 'category', 'price_range']))
-                                    <div class="col-md-1 mb-3">
-                                        <a href="{{ route('client.home') }}" class="btn btn-secondary"
-                                            style="padding: 12px 15px; border-radius: 25px; width: 100%;">
-                                            <i class="fa fa-times"></i>
-                                        </a>
-                                    </div>
-                                @endif
-                            </div>
-                        </form>
-
-                        @if (request()->hasAny(['search', 'brand', 'category', 'price_range']))
-                            <div class="search-results-info mt-3">
-                                <p class="text-muted">
-                                    <i class="fa fa-info-circle"></i>
-                                    Kết quả tìm kiếm: {{ count($products) }} xe máy
-                                    @if (request('search'))
-                                        cho "<strong>{{ request('search') }}</strong>"
-                                    @endif
-                                </p>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Search Section Ends -->
-
     <!-- Latest Motorcycles -->
     <div class="latest-products">
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
                     <div class="section-heading">
-                        @if (request()->hasAny(['search', 'brand', 'category', 'price_range']))
-                            <h2>Kết Quả Tìm Kiếm</h2>
-                        @else
-                            <h2>Xe Máy Mới Nhất</h2>
-                        @endif
+                        <h2>Xe Máy Mới Nhất</h2>
                         <a href="{{ route('client.motorcycles') }}">xem tất cả xe máy <i class="fa fa-angle-right"></i></a>
                     </div>
                 </div>
@@ -196,14 +95,8 @@
                 @else
                     <div class="col-md-12">
                         <div class="text-center py-5">
-                            @if (request()->hasAny(['search', 'brand', 'category', 'price_range']))
-                                <h4>Không tìm thấy xe máy phù hợp</h4>
-                                <p>Vui lòng thử thay đổi từ khóa tìm kiếm hoặc bộ lọc.</p>
-                                <a href="{{ route('client.home') }}" class="btn btn-primary">Xem tất cả xe máy</a>
-                            @else
-                                <h4>Không có sản phẩm nào</h4>
-                                <p>Hiện tại chưa có xe máy nào để hiển thị.</p>
-                            @endif
+                            <h4>Không có sản phẩm nào</h4>
+                            <p>Hiện tại chưa có xe máy nào để hiển thị.</p>
                         </div>
                     </div>
                 @endif
@@ -213,6 +106,7 @@
     </div>
     </div>
     </div>
+
     <!-- Pagination -->
     @include('components.pagination')
 
