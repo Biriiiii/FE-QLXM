@@ -13,11 +13,17 @@ class ProductHelper
      */
     public static function getProductsByIds(array $ids)
     {
-        if (empty($ids)) return [];
+        if (empty($ids)) {
+            return [];
+        }
         $apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
-        $response = Http::get($apiUrl . '/api/products', ['ids' => implode(',', $ids)]);
-        if ($response->successful()) {
-            return $response->json('data') ?? [];
+        try {
+            $response = Http::get($apiUrl . '/api/products', ['ids' => implode(',', $ids)]);
+            if ($response->successful()) {
+                return $response->json('data') ?? [];
+            }
+        } catch (\Exception $e) {
+            // Log error nếu cần
         }
         return [];
     }
