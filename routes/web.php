@@ -21,14 +21,13 @@ use App\Http\Controllers\Client\BrandClientController;
 use App\Http\Controllers\Client\CartController;
 // Client Routes
 Route::name('client.')->group(function () {
-    // Đặt hàng (checkout)
-    Route::get('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
-    Route::post('/cart/checkout', [CartController::class, 'processCheckout'])->name('cart.processCheckout');
     // Giỏ hàng
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
     Route::post('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
     Route::post('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::get('/cart/count', [CartController::class, 'count'])->name('cart.count');
+    
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/motorcycles', [MotorcycleController::class, 'index'])->name('motorcycles');
     Route::get('/motorcycles/{id}', [MotorcycleController::class, 'show'])->name('motorcycles.show');
@@ -36,7 +35,10 @@ Route::name('client.')->group(function () {
     Route::get('/brands', [BrandClientController::class, 'index'])->name('brands');
     Route::get('/brands/{id}', [BrandClientController::class, 'show'])->name('brands.show');
     Route::get('/about', [AboutController::class, 'index'])->name('about');
-    Route::get('/contact', [ContactController::class, 'index'])->name('contact');
+    Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
+    Route::get('/checkout', [HomeController::class, 'checkout'])->name('checkout');
+    Route::post('/checkout', [HomeController::class, 'processCheckout'])->name('checkout.process');
+
     Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');
 
     // Test image route - không cần token
@@ -49,6 +51,8 @@ Route::name('client.')->group(function () {
     Route::get('/test-product', function () {
         return view('test-product');
     })->name('test.product.index');
+    
+
 });
 
 // Authentication Routes

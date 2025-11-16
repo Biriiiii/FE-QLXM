@@ -5,113 +5,165 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Log;
+use App\Helpers\ProductHelper; // 👈 1. Đảm bảo đã import Helper
 
 class CartController extends Controller
 {
-    // Hiển thị form đặt hàng (checkout)
-    public function checkout()
-    {
-        $cart = Session::get('cart', []);
-        if (empty($cart)) {
-            return redirect()->route('client.cart.index')->with('error', 'Giỏ hàng trống!');
-        }
-        // Lấy thông tin customer từ cookie nếu có
-        $customerInfo = null;
-        if (request()->hasCookie('customer_info')) {
-            $customerInfo = json_decode(request()->cookie('customer_info'), true);
-        }
-        return view('client.order.checkout', compact('cart', 'customerInfo'));
-    }
+    // ... (Hàm getCart() và saveCart() của bạn đã tốt, giữ nguyên) ...
 
-    // Xử lý đặt hàng
-    public function processCheckout(Request $request)
+    private function getCart()
     {
         $cart = Session::get('cart', []);
         if (empty($cart)) {
-            return redirect()->route('client.cart.index')->with('error', 'Giỏ hàng trống!');
-        }
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'email' => 'required|email',
-            'address' => 'required|string|max:255',
-        ]);
-        // Lưu thông tin khách hàng vào cookie (30 ngày)
-        cookie()->queue(cookie('customer_info', json_encode($validated), 60 * 24 * 30));
-        // TODO: Gọi API hoặc lưu vào DB: tạo customer nếu chưa có, tạo order với customer_id, tổng tiền, đặt cọc 30%
-        // Sau khi đặt hàng thành công:
-        Session::forget('cart');
-        return redirect()->route('client.cart.index')->with('success', 'Đặt hàng thành công!');
-    }
-    // Hiển thị giỏ hàng
-    public function index()
-    {
-        $cart = Session::get('cart', []);
-        $productIds = collect($cart)->pluck('product_id')->all();
-        $products = [];
-        if (!empty($productIds)) {
-            $products = \App\Helpers\ProductHelper::getProductsByIds($productIds);
-        }
-        // Map product_id => product info for easy lookup
-        $productMap = [];
-        foreach ($products as $prod) {
-            if (isset($prod['id'])) {
-                $productMap[$prod['id']] = $prod;
+            $cartCookie = Cookie::get('cart');
+            if ($cartCookie) {
+                $cart = json_decode($cartCookie, true) ?: [];
+                Session::put('cart', $cart);
+                Session::save();
             }
         }
-        // Đảm bảo luôn truyền biến productMap (dù rỗng)
-        return view('client.order.cart', [
-            'cart' => $cart,
-            'productMap' => $productMap
-        ]);
+        return $cart;
     }
 
-    // Thêm sản phẩm vào giỏ hàng
+    private function saveCart($cart)
+    {
+        Session::put('cart', $cart);
+        Session::save();
+        Cookie::queue('cart', json_encode($cart), 60 * 24 * 30);
+    }
+
+    /**
+     * TỐI ƯU HÓA:
+     * Hàm index() giờ đây không cần gọi API nào, 
+     * nó chỉ đọc dữ liệu đã được lưu sẵn trong session.
+     */
+    public function index()
+    {
+        $cart = $this->getCart();
+        $cartItems = [];
+        $totalPrice = 0;
+
+        foreach ($cart as $id => $item) {
+            // Lấy trực tiếp thông tin đã lưu từ session
+            $subtotal = ($item['price'] ?? 0) * $item['quantity'];
+            $cartItems[] = [
+                'id' => $id,
+                'name' => $item['name'] ?? 'Sản phẩm không rõ',
+                'price' => $item['price'] ?? 0,
+                'image_url' => $item['image_url'] ?? asset('img/product_01.jpg'), // Ảnh placeholder
+                'quantity' => $item['quantity'],
+                'subtotal' => $subtotal
+            ];
+            $totalPrice += $subtotal;
+        }
+
+        return view('client.cart.index', compact('cartItems', 'totalPrice'));
+    }
+
+    /**
+     * TỐI ƯU HÓA:
+     * Hàm add() sẽ gọi API 1 lần để lấy chi tiết sản phẩm
+     * và lưu vào session.
+     */
     public function add(Request $request)
     {
-        $productId = $request->input('motorcycle_id') ?? $request->input('product_id');
-        $quantity = max(1, (int)$request->input('quantity', 1));
+        try {
+            $productId = $request->input('product_id');
+            $quantity = (int) $request->input('quantity', 1);
 
-        if (!$productId) {
-            return redirect()->back()->with('error', 'Không tìm thấy sản phẩm để thêm vào giỏ hàng!');
+            // 1. Lấy thông tin chi tiết sản phẩm TỪ API (1 lần duy nhất)
+            $product = ProductHelper::getProductById($productId);
+
+            // 2. Kiểm tra sản phẩm có tồn tại không
+            if (!$product || !isset($product['id'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy sản phẩm.'
+                ], 404);
+            }
+
+            $cart = $this->getCart();
+
+            if (isset($cart[$productId])) {
+                // 3. Nếu đã có, chỉ cập nhật số lượng
+                $cart[$productId]['quantity'] += $quantity;
+            } else {
+                // 4. Nếu là sản phẩm mới, lưu chi tiết vào giỏ hàng
+                $cart[$productId] = [
+                    'quantity' => $quantity,
+                    'name' => $product['name'] ?? 'Không rõ tên',
+                    'price' => $product['price'] ?? 0,
+                    'image_url' => $product['image_url'] ?? null, // Lấy từ helper
+                ];
+            }
+
+            $this->saveCart($cart);
+
+            $cartCount = array_sum(array_column($cart, 'quantity'));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã thêm sản phẩm vào giỏ hàng!',
+                'cartCount' => $cartCount
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Lỗi khi thêm vào giỏ hàng: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi máy chủ khi thêm vào giỏ hàng.'
+            ], 500);
         }
-
-        $cart = Session::get('cart', []);
-
-        if (isset($cart[$productId])) {
-            $cart[$productId]['quantity'] += $quantity;
-        } else {
-            $cart[$productId] = [
-                'product_id' => $productId,
-                'quantity' => $quantity
-            ];
-        }
-
-        Session::put('cart', $cart);
-
-        return redirect()->route('client.cart.index')->with('success', 'Đã thêm vào giỏ hàng!');
     }
 
-    // Xóa sản phẩm khỏi giỏ hàng
+    /**
+     * Cập nhật số lượng sản phẩm (Đã tối ưu)
+     */
+    public function update(Request $request, $id)
+    {
+        $quantity = (int) $request->input('quantity', 1);
+
+        if ($quantity <= 0) {
+            return $this->remove($id);
+        }
+
+        $cart = $this->getCart();
+
+        if (isset($cart[$id])) {
+            $cart[$id]['quantity'] = $quantity; // Chỉ cập nhật số lượng
+            $this->saveCart($cart);
+        }
+
+        return redirect()->route('client.cart.index')->with('success', 'Đã cập nhật giỏ hàng!');
+    }
+
+    /**
+     * Xóa sản phẩm khỏi giỏ hàng (Không đổi)
+     */
     public function remove($id)
     {
-        $cart = Session::get('cart', []);
-        unset($cart[$id]);
-        Session::put('cart', $cart);
+        $cart = $this->getCart();
+
+        if (isset($cart[$id])) {
+            unset($cart[$id]);
+            $this->saveCart($cart);
+        }
+
         return redirect()->route('client.cart.index')->with('success', 'Đã xóa sản phẩm khỏi giỏ hàng!');
     }
 
-    // Cập nhật số lượng sản phẩm
-    public function update(Request $request, $id)
+    /**
+     * Đếm số sản phẩm trong giỏ hàng (Không đổi)
+     */
+    public function count()
     {
-        $quantity = $request->input('quantity', 1);
-        $cart = Session::get('cart', []);
-        if (isset($cart[$id])) {
-            $cart[$id]['quantity'] = $quantity;
-            Session::put('cart', $cart);
-        }
-        return redirect()->route('client.cart.index')->with('success', 'Đã cập nhật số lượng!');
-    }
+        $cart = $this->getCart();
+        $cartCount = array_sum(array_column($cart, 'quantity'));
 
-    // ...existing code...
+        return response()->json([
+            'success' => true,
+            'cartCount' => $cartCount
+        ]);
+    }
 }

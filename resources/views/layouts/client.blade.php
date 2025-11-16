@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="@yield('description', 'Hệ thống quản lý xe máy chuyên nghiệp')">
     <meta name="author" content="QLXM">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="shortcut icon" href="{{ asset('img/icons/iconqlxm.jpg') }}" />
     <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900&display=swap"
         rel="stylesheet">
@@ -76,12 +77,10 @@
                                 <a class="nav-link" href="{{ route('login') }}">Đăng Nhập</a>
                             </li>
                         @endauth
-                        <!-- Nút giỏ hàng -->
                         <li class="nav-item">
-                            <a class="nav-link position-relative" href="{{ route('client.cart.index') }}">
+                            <a class="nav-link" href="{{ route('client.cart.index') }}">
                                 <i class="fa fa-shopping-cart"></i> Giỏ hàng
-                                <span id="cart-count-badge" class="badge badge-danger position-absolute"
-                                    style="top:2px;right:-18px;display:none;">0</span>
+                                <span id="cart-count" class="badge badge-danger" style="display: none;">0</span>
                             </a>
                         </li>
                     </ul>
@@ -138,38 +137,7 @@
                 }
             }, 2000);
         });
-        // Hiển thị số lượng sản phẩm trong giỏ hàng (FE, sessionStorage/cookie)
-        function getCartCount() {
-            // Ưu tiên sessionStorage, fallback cookie
-            var count = 0;
-            if (window.sessionStorage && sessionStorage.getItem('cart_count')) {
-                count = parseInt(sessionStorage.getItem('cart_count')) || 0;
-            } else {
-                // Đọc cookie cart nếu có
-                var match = document.cookie.match(/cart=([^;]+)/);
-                if (match) {
-                    try {
-                        var cart = JSON.parse(decodeURIComponent(match[1]));
-                        count = Array.isArray(cart) ? cart.length : 0;
-                    } catch (e) {}
-                }
-            }
-            return count;
-        }
 
-        function updateCartBadge() {
-            var count = getCartCount();
-            var badge = document.getElementById('cart-count-badge');
-            if (badge) {
-                if (count > 0) {
-                    badge.textContent = count;
-                    badge.style.display = '';
-                } else {
-                    badge.style.display = 'none';
-                }
-            }
-        }
-        document.addEventListener('DOMContentLoaded', updateCartBadge);
     </script>
 
     @stack('scripts')

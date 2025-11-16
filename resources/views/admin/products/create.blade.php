@@ -3,7 +3,7 @@
 @section('content')
     <div class="container">
         <h1>Thêm sản phẩm mới</h1>
-        
+
         <!-- Display Errors -->
         @if ($errors->any())
             <div class="alert alert-danger">
@@ -14,7 +14,7 @@
                 </ul>
             </div>
         @endif
-        
+
         <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="mb-3">
@@ -29,11 +29,12 @@
                 <label for="image" class="form-label">Ảnh sản phẩm</label>
                 <input type="file" name="image" id="image" class="form-control" accept="image/*">
                 <small class="form-text text-muted">Chấp nhận file: JPG, JPEG, PNG, GIF. Kích thước tối đa: 2MB</small>
-                
+
                 <!-- Image Preview -->
                 <div id="imagePreview" class="mt-3" style="display: none;">
                     <p class="mb-2"><strong>Xem trước:</strong></p>
-                    <img id="previewImg" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;">
+                    <img id="previewImg" src="" alt="Preview"
+                        style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;">
                 </div>
             </div>
             <div class="mb-3">
@@ -84,7 +85,7 @@
             const file = e.target.files[0];
             const preview = document.getElementById('imagePreview');
             const previewImg = document.getElementById('previewImg');
-            
+
             if (file) {
                 // Check file size (2MB = 2 * 1024 * 1024 bytes)
                 if (file.size > 2 * 1024 * 1024) {
@@ -93,7 +94,7 @@
                     preview.style.display = 'none';
                     return;
                 }
-                
+
                 // Check file type
                 const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
                 if (!allowedTypes.includes(file.type)) {
@@ -102,7 +103,7 @@
                     preview.style.display = 'none';
                     return;
                 }
-                
+
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     previewImg.src = e.target.result;

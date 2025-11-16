@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Pool; // 👈 1. Import Pool
 
 class MotorcycleController extends Controller
 {
@@ -13,329 +16,266 @@ class MotorcycleController extends Controller
 
     public function __construct()
     {
-        $this->apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
+        $this->apiUrl = rtrim(config('app.be_api_url'), '/');
     }
+
     /**
-     * Display a listing of motorcycles.
+     * TỐI ƯU: Helper tạo API call (Client-side)
+     */
+    private function clientApi(): PendingRequest
+    {
+        return Http::baseUrl($this->apiUrl . '/api/client')
+            ->timeout(10);
+    }
+
+    /**
+     * TỐI ƯU: Chuẩn hóa logic lấy URL ảnh (fix bug/inconsistency)
+     */
+    private function formatProductImageUrl(array &$product)
+    {
+        // Ưu tiên image_url (đã có URL đầy đủ)
+        if (!empty($product['image_url'])) {
+            $product['image_url'] = $product['image_url'];
+        }
+        // Nếu không có, tự tạo từ cột 'image'
+        elseif (!empty($product['image'])) {
+            $product['image_url'] = $this->apiUrl . '/storage/' . $product['image'];
+        }
+        // Nếu không có cả hai
+        else {
+            $product['image_url'] = null; // hoặc ảnh placeholder
+        }
+    }
+
+
+    /**
+     * TỐI ƯU: Dùng Http::pool() chạy song song
      */
     public function index(Request $request)
     {
+        $viewData = [
+            'products' => [],
+            'brands' => [],
+            'categories' => [],
+            'pagination' => null,
+            'paginationLinks' => null, // Thêm paginationLinks
+            'error' => null
+        ];
+
         try {
-            $params = [
-                'page' => $request->get('page', 1),
-                'limit' => $request->get('limit', 5),
-            ];
+            // Chuẩn bị params (Code cũ của bạn đã tốt)
+            $limit = $request->get('limit', 5);
+            $allowedLimits = [5, 10, 15, 20];
+            $params = $request->query();
+            $params['limit'] = in_array($limit, $allowedLimits) ? $limit : 5;
 
-            // Thêm filter nếu có
-            if ($request->filled('brand_id')) {
-                $params['brand_id'] = $request->get('brand_id');
-            }
-
-            if ($request->filled('category_id')) {
-                $params['category_id'] = $request->get('category_id');
-            }
-
-            if ($request->filled('search')) {
-                $params['search'] = $request->get('search');
-            }
-
-            // Call API lấy danh sách sản phẩm
-            $response = Http::timeout(10)->get($this->apiUrl . '/api/client/products', $params);
-
-            $products = [];
-            $pagination = null;
-
-            if ($response->successful()) {
-                $data = $response->json();
-                $products = $data['data'] ?? [];
-                $pagination = $data['meta'] ?? null;
-
-                // Thêm image_url cho mỗi sản phẩm
-                foreach ($products as &$product) {
-                    $product['image_url'] = !empty($product['image_url'])
-                        ? $product['image_url']
-                        : null;
-                }
-
-                Log::info('Motorcycles API Success: ' . count($products) . ' products loaded');
-            } else {
-                Log::error('Motorcycles API Error: ' . $response->status());
-                $error = 'Không thể tải danh sách xe máy';
-            }
-
-            // Lấy danh sách brands và categories cho filter
-            $brands = $this->getBrands();
-            $categories = $this->getCategories();
-
-            return view('client.motorcycles', compact('products', 'brands', 'categories', 'pagination'))
-                ->with('error', $error ?? null);
-        } catch (\Exception $e) {
-            Log::error('Motorcycles Controller Error: ' . $e->getMessage());
-
-            return view('client.motorcycles', [
-                'products' => [],
-                'brands' => [],
-                'categories' => [],
-                'pagination' => null,
-                'error' => 'Không thể tải dữ liệu từ server'
+            // 2. Chạy 3 request CÙNG LÚC
+            $responses = Http::pool(fn(Pool $pool) => [
+                $pool->as('products')->baseUrl($this->apiUrl . '/api/client')->get('/products', $params),
+                $pool->as('brands')->baseUrl($this->apiUrl . '/api/client')->get('/brands'),
+                $pool->as('categories')->baseUrl($this->apiUrl . '/api/client')->get('/categories'),
             ]);
+
+            // Xử lý Products
+            if ($responses['products']->successful()) {
+                $data = $responses['products']->json();
+                $viewData['products'] = $data['data'] ?? [];
+                $viewData['pagination'] = $data['meta'] ?? null;
+                $viewData['paginationLinks'] = $data['links'] ?? null; // Thêm
+
+                foreach ($viewData['products'] as &$product) {
+                    $this->formatProductImageUrl($product);
+                }
+            } else {
+                Log::error('Motorcycles API Error: ' . $responses['products']->status());
+                $viewData['error'] = 'Không thể tải danh sách xe máy';
+            }
+
+            // Xử lý Brands (vẫn tải dù product lỗi)
+            $viewData['brands'] = $responses['brands']->successful() ? $responses['brands']->json('data', []) : [];
+            // Xử lý Categories (vẫn tải dù product lỗi)
+            $viewData['categories'] = $responses['categories']->successful() ? $responses['categories']->json('data', []) : [];
+
+            return view('client.motorcycles', $viewData);
+        } catch (ConnectionException $e) {
+            Log::error('Motorcycles Controller Error: ' . $e->getMessage());
+            $viewData['error'] = 'Không thể tải dữ liệu từ server';
+            return view('client.motorcycles', $viewData);
         }
     }
 
     /**
-     * Display the specified motorcycle.
+     * TỐI ƯU: Đã dọn dẹp, nhưng vẫn phải chạy tuần tự
+     * (getRelatedProducts phụ thuộc vào $product)
      */
     public function show($id)
     {
         try {
-            $apiEndpoint = $this->apiUrl . '/api/client/products/' . $id;
-            Log::info('Trying to fetch product from: ' . $apiEndpoint);
-
-            $response = Http::timeout(10)->get($apiEndpoint);
-            Log::info('API Response Status: ' . $response->status());
-            Log::info('API Response Body: ' . $response->body());
-
+            $response = $this->clientApi()->get("/products/{$id}");
             $product = null;
-            $relatedProducts = [];
 
             if ($response->successful()) {
                 $data = $response->json();
-                Log::info('Raw API response: ' . json_encode($data));
 
-                // Handle all possible API response structures
+                // Đơn giản hóa logic lấy product
                 if (isset($data['data']) && is_array($data['data'])) {
                     $product = $data['data'];
-                } elseif (isset($data['data']) && is_object($data['data'])) {
-                    $product = (array)$data['data'];
-                } elseif (isset($data['id'])) {
+                } elseif (isset($data['id'])) { // API trả về 1 object
                     $product = $data;
-                } elseif (is_array($data) && !empty($data)) {
-                    $product = $data;
-                } else {
-                    $product = null;
                 }
 
-                // Ensure $product is an array
-                if ($product && !is_array($product)) {
-                    $product = (array)$product;
-                }
+                if ($product) {
+                    $this->formatProductImageUrl($product); // Chuẩn hóa URL ảnh
 
-                Log::info('Processed product data: ' . json_encode($product));
+                    // Lấy sản phẩm liên quan (bắt buộc phải tuần tự)
+                    $relatedProducts = $this->getRelatedProducts($product, $id);
 
-                if ($product && isset($product['id'])) {
-                    // Defensive: ensure all expected keys exist
-                    $product['image_url'] = !empty($product['image_url'])
-                        ? $product['image_url']
-                        : (isset($product['image']) && $product['image'] ? $this->apiUrl . '/storage/' . $product['image'] : null);
-                    $product['brand'] = isset($product['brand']) && is_array($product['brand']) ? $product['brand'] : [];
-                    $product['category'] = isset($product['category']) && is_array($product['category']) ? $product['category'] : [];
-                    $product['specifications'] = isset($product['specifications']) && is_array($product['specifications']) ? $product['specifications'] : [];
-                    $product['description'] = $product['description'] ?? '';
-                    $product['status'] = $product['status'] ?? '';
-                    $product['stock'] = $product['stock'] ?? null;
-                    $product['price'] = $product['price'] ?? 0;
-
-                    // Get related products
-                    $relatedProducts = $this->getRelatedProducts($product);
-                    Log::info('Product Detail API Success for ID: ' . $id);
                     return view('client.motorcycles.show', compact('product', 'relatedProducts'));
-                } else {
-                    Log::warning('Product data is null, empty, or missing id');
                 }
-            } else {
-                Log::error('Product Detail API Error for ID: ' . $id . ', Status: ' . $response->status());
-                Log::error('Response body: ' . $response->body());
             }
-        } catch (\Exception $e) {
+
+            // Lỗi 404 hoặc response rỗng
+            Log::error('Product Detail API Error for ID: ' . $id . ', Status: ' . $response->status());
+        } catch (ConnectionException $e) {
             Log::error('Product Detail Controller Error: ' . $e->getMessage());
-            Log::error('Error trace: ' . $e->getTraceAsString());
         }
 
-        // Nếu có lỗi hoặc không tìm thấy sản phẩm
+        // Trả về lỗi
         return view('client.motorcycles.show', [
             'product' => null,
             'relatedProducts' => [],
-            'error' => 'Không tìm thấy sản phẩm với ID: ' . $id . '. Vui lòng kiểm tra backend API: ' . $this->apiUrl
+            'error' => 'Không tìm thấy sản phẩm.'
         ]);
     }
 
     /**
-     * Display a listing of brands.
+     * TỐI ƯU: Dùng clientApi helper
      */
     public function brands(Request $request)
     {
         try {
-            $params = [
-                'page' => $request->get('page', 1),
-                'limit' => 5, // 5 brands mỗi trang
-            ];
-
-            // Call API lấy danh sách brands
-            $response = Http::timeout(10)->get($this->apiUrl . '/api/client/brands', $params);
+            // Gửi tất cả query (bao gồm page, limit...)
+            $response = $this->clientApi()->get('/brands', $request->query());
 
             $brands = [];
             $pagination = null;
+            $paginationLinks = null;
 
             if ($response->successful()) {
                 $data = $response->json();
                 $brands = $data['data'] ?? [];
                 $pagination = $data['meta'] ?? null;
-
-                Log::info('Brands API Success: ' . count($brands) . ' brands loaded');
+                $paginationLinks = $data['links'] ?? null;
             } else {
                 Log::error('Brands API Error: ' . $response->status());
                 $error = 'Không thể tải danh sách hãng xe';
             }
 
-            return view('client.brands', compact('brands', 'pagination'))
+            return view('client.brands', compact('brands', 'pagination', 'paginationLinks'))
                 ->with('error', $error ?? null);
-        } catch (\Exception $e) {
+        } catch (ConnectionException $e) {
             Log::error('Brands Controller Error: ' . $e->getMessage());
-
             return view('client.brands', [
                 'brands' => [],
                 'pagination' => null,
+                'paginationLinks' => null,
                 'error' => 'Không thể tải dữ liệu từ server'
             ]);
         }
     }
 
     /**
-     * Display motorcycles by brand.
+     * TỐI ƯU: Dùng Http::pool() chạy song song
      */
     public function brandDetail($id, Request $request)
     {
+        $viewData = [
+            'brand' => null,
+            'products' => [],
+            'pagination' => null,
+            'paginationLinks' => null,
+            'error' => null
+        ];
+
         try {
-            // Call API lấy thông tin brand
-            $brandResponse = Http::timeout(10)->get($this->apiUrl . '/api/client/brands/' . $id);
+            // Chuẩn bị params
+            $productParams = $request->query();
+            $productParams['brand_id'] = $id;
 
-            $brand = null;
-            if ($brandResponse->successful()) {
-                $brandData = $brandResponse->json();
-                $brand = $brandData['data'] ?? null;
-            }
-
-            // Call API lấy sản phẩm theo brand
-            $params = [
-                'brand_id' => $id,
-                'page' => $request->get('page', 1),
-                'limit' => $request->get('limit', 5),
-            ];
-
-            $response = Http::timeout(10)->get($this->apiUrl . '/api/client/products', $params);
-
-            $products = [];
-            $pagination = null;
-
-            if ($response->successful()) {
-                $data = $response->json();
-                $products = $data['data'] ?? [];
-                $pagination = $data['meta'] ?? null;
-
-                // Thêm image_url cho mỗi sản phẩm
-                foreach ($products as &$product) {
-                    $product['image_url'] = !empty($product['image'])
-                        ? $this->apiUrl . '/storage/' . $product['image']
-                        : null;
-                }
-
-                Log::info('Brand Detail API Success for Brand ID: ' . $id . ', Products: ' . count($products));
-            } else {
-                Log::error('Brand Detail API Error for Brand ID: ' . $id . ', Status: ' . $response->status());
-                $error = 'Không thể tải sản phẩm của hãng';
-            }
-
-            return view('client.brand-detail', compact('brand', 'products', 'pagination'))
-                ->with('error', $error ?? null);
-        } catch (\Exception $e) {
-            Log::error('Brand Detail Controller Error: ' . $e->getMessage());
-
-            return view('client.brand-detail', [
-                'brand' => null,
-                'products' => [],
-                'pagination' => null,
-                'error' => 'Không thể tải dữ liệu từ server'
+            // 3. Chạy 2 request CÙNG LÚC
+            $responses = Http::pool(fn(Pool $pool) => [
+                $pool->as('brand')->baseUrl($this->apiUrl . '/api/client')->get("/brands/{$id}"),
+                $pool->as('products')->baseUrl($this->apiUrl . '/api/client')->get("/products", $productParams),
             ]);
-        }
-    }
 
-    /**
-     * Helper method to get brands
-     */
-    private function getBrands()
-    {
-        try {
-            $response = Http::timeout(5)->get($this->apiUrl . '/api/client/brands');
-            if ($response->successful()) {
-                $data = $response->json();
-                return $data['data'] ?? [];
+            // Xử lý Brand
+            if ($responses['brand']->successful()) {
+                $viewData['brand'] = $responses['brand']->json('data', []);
+            } else {
+                abort(404, 'Không tìm thấy thương hiệu này.');
             }
-        } catch (\Exception $e) {
-            Log::warning('Get Brands Error: ' . $e->getMessage());
-        }
-        return [];
-    }
 
-    /**
-     * Helper method to get categories
-     */
-    private function getCategories()
-    {
-        try {
-            $response = Http::timeout(5)->get($this->apiUrl . '/api/client/categories');
-            if ($response->successful()) {
-                $data = $response->json();
-                return $data['data'] ?? [];
+            // Xử lý Products
+            if ($responses['products']->successful()) {
+                $data = $responses['products']->json();
+                $viewData['products'] = $data['data'] ?? [];
+                $viewData['pagination'] = $data['meta'] ?? null;
+                $viewData['paginationLinks'] = $data['links'] ?? null;
+
+                foreach ($viewData['products'] as &$product) {
+                    $this->formatProductImageUrl($product);
+                }
+            } else {
+                Log::error('Brand Detail API Error for Brand ID: ' . $id . ', Status: ' . $responses['products']->status());
+                $viewData['error'] = 'Không thể tải sản phẩm của hãng';
             }
-        } catch (\Exception $e) {
-            Log::warning('Get Categories Error: ' . $e->getMessage());
+
+            return view('client.brand-detail', $viewData);
+        } catch (ConnectionException $e) {
+            Log::error('Brand Detail Controller Error: ' . $e->getMessage());
+            $viewData['error'] = 'Không thể tải dữ liệu từ server';
+            return view('client.brand-detail', $viewData);
         }
-        return [];
     }
 
+
     /**
-     * Helper method to get related products
+     * Helper method to get related products (Đã được tối ưu)
      */
-    private function getRelatedProducts($product)
+    private function getRelatedProducts(array $product, $currentProductId)
     {
         try {
-            $params = [
-                'limit' => 3, // Lấy 3 sản phẩm liên quan
-            ];
+            $params = ['limit' => 4]; // Lấy 4, phòng trường hợp trùng
 
-            // Ưu tiên sản phẩm cùng brand
             if (isset($product['brand']['id'])) {
                 $params['brand_id'] = $product['brand']['id'];
             } elseif (isset($product['category']['id'])) {
-                // Nếu không có brand thì lấy cùng category
                 $params['category_id'] = $product['category']['id'];
             }
 
-            $response = Http::timeout(5)->get($this->apiUrl . '/api/client/products', $params);
+            // Dùng clientApi() cho nhất quán
+            $response = $this->clientApi()->get('/products', $params);
 
             if ($response->successful()) {
-                $data = $response->json();
-                $relatedProducts = $data['data'] ?? [];
+                $relatedProducts = $response->json('data', []);
 
-                // Loại bỏ sản phẩm hiện tại khỏi danh sách liên quan
-                $relatedProducts = array_filter($relatedProducts, function ($relatedProduct) use ($product) {
-                    return $relatedProduct['id'] != $product['id'];
+                // Lọc sản phẩm hiện tại
+                $relatedProducts = array_filter($relatedProducts, function ($p) use ($currentProductId) {
+                    return $p['id'] != $currentProductId;
                 });
 
-                // Thêm image_url cho các sản phẩm liên quan
+                // Chuẩn hóa URL ảnh
                 foreach ($relatedProducts as &$relatedProduct) {
-                    $relatedProduct['image_url'] = !empty($relatedProduct['image_url'])
-                        ? $relatedProduct['image_url']
-                        : null;
+                    $this->formatProductImageUrl($relatedProduct);
                 }
 
-                // Chỉ lấy 3 sản phẩm đầu tiên
-                return array_slice($relatedProducts, 0, 3);
+                return array_slice($relatedProducts, 0, 3); // Lấy 3
             }
-        } catch (\Exception $e) {
+        } catch (ConnectionException $e) {
             Log::warning('Get Related Products Error: ' . $e->getMessage());
         }
-
         return [];
     }
+
+    // ĐÃ XÓA: getBrands() và getCategories() (vì đã gộp vào pool của index())
 }

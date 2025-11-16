@@ -176,3 +176,103 @@ jQuery( document ).ready(function( $ ) {
         });
  
 });
+
+// Tìm kiếm sản phẩm
+function searchProducts() {
+    const keyword = document.getElementById('searchInput').value.trim();
+    if (keyword) {
+        // Redirect to motorcycles page with search parameter
+        window.location.href = `/motorcycles?search=${encodeURIComponent(keyword)}`;
+    }
+}
+
+// Thêm sản phẩm vào giỏ hàng
+function addToCart(productId) {
+    const quantityInput = document.getElementById('quantity');
+    const quantity = quantityInput ? quantityInput.value : 1;
+    
+    console.log('Adding to cart:', productId, 'quantity:', quantity);
+    
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('quantity', quantity);
+    
+    // Lấy CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+    if (!csrfToken) {
+        alert('Lỗi bảo mật. Vui lòng tải lại trang.');
+        return;
+    }
+    
+    fetch('/cart/add', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+            'Accept': 'application/json',
+        },
+        body: formData
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        if (data.success) {
+            alert(data.message);
+            updateCartCount();
+            // Lưu vào localStorage để backup
+            saveCartToLocalStorage(productId, quantity);
+        } else {
+            alert(data.message || 'Có lỗi xảy ra khi thêm vào giỏ hàng');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi thêm vào giỏ hàng');
+    });
+}
+
+// Lưu giỏ hàng vào localStorage như backup
+function saveCartToLocalStorage(productId, quantity) {
+    let cart = JSON.parse(localStorage.getItem('cart') || '{}');
+    if (cart[productId]) {
+        cart[productId].quantity += parseInt(quantity);
+    } else {
+        cart[productId] = { quantity: parseInt(quantity) };
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    console.log('Saved to localStorage:', cart);
+}
+
+// Cập nhật số lượng giỏ hàng trên header
+function updateCartCount() {
+    fetch('/cart/count', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const countElement = document.getElementById('cart-count');
+            if (countElement) {
+                if (data.cartCount > 0) {
+                    countElement.textContent = data.cartCount;
+                    countElement.style.display = 'inline';
+                } else {
+                    countElement.style.display = 'none';
+                }
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error updating cart count:', error);
+    });
+}
+
+// Load số lượng giỏ hàng khi trang được tải
+document.addEventListener('DOMContentLoaded', function() {
+    updateCartCount();
+});

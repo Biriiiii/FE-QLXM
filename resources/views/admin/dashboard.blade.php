@@ -98,7 +98,23 @@
                                         <td>{{ $order['customer']['name'] ?? '-' }}</td>
                                         <td>{{ number_format($order['total_amount'] ?? 0, 0, ',', '.') }}₫</td>
                                         <td>{{ $order['status'] ?? '-' }}</td>
-                                        <td>{{ !empty($order['created_at']) ? \Carbon\Carbon::parse($order['created_at'])->format('d/m/Y') : '-' }}
+                                        <td>
+                                            @php
+                                                try {
+                                                    $date = \Carbon\Carbon::createFromFormat(
+                                                        'd/m/Y H:i',
+                                                        $order['created_at'] ?? '',
+                                                    );
+                                                    echo $date->format('d/m/Y');
+                                                } catch (\Exception $e) {
+                                                    try {
+                                                        $date = \Carbon\Carbon::parse($order['created_at'] ?? '');
+                                                        echo $date->format('d/m/Y');
+                                                    } catch (\Exception $e2) {
+                                                        echo '-';
+                                                    }
+                                                }
+                                            @endphp
                                         </td>
                                     </tr>
                                 @endforeach
@@ -126,7 +142,23 @@
                                         <td>{{ $product['id'] }}</td>
                                         <td>{{ $product['name'] }}</td>
                                         <td>{{ number_format($product['price'] ?? 0, 0, ',', '.') }}₫</td>
-                                        <td>{{ !empty($product['created_at']) ? \Carbon\Carbon::parse($product['created_at'])->format('d/m/Y') : '-' }}
+                                        <td>
+                                            @php
+                                                try {
+                                                    $date = \Carbon\Carbon::createFromFormat(
+                                                        'd/m/Y H:i',
+                                                        $product['created_at'] ?? '',
+                                                    );
+                                                    echo $date->format('d/m/Y');
+                                                } catch (\Exception $e) {
+                                                    try {
+                                                        $date = \Carbon\Carbon::parse($product['created_at'] ?? '');
+                                                        echo $date->format('d/m/Y');
+                                                    } catch (\Exception $e2) {
+                                                        echo '-';
+                                                    }
+                                                }
+                                            @endphp
                                         </td>
                                     </tr>
                                 @endforeach

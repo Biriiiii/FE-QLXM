@@ -52,23 +52,21 @@
 
                         <p class="mb-4">{{ $product['description'] ?? 'Chưa có mô tả sản phẩm.' }}</p>
 
-                        {{-- Form Thêm vào giỏ hàng --}}
-                        <form action="{{ route('client.cart.add', $product['id'] ?? 0) }}" method="POST" class="mb-3">
-                            @csrf
+                        {{-- Form Mua hàng --}}
+                        <div class="mb-3">
                             <div class="d-flex align-items-center mb-3">
                                 <label for="quantity" class="me-2 fw-semibold">Số lượng:</label>
-                                <input type="number" name="quantity" id="quantity" value="1" min="1"
+                                <input type="number" id="quantity" value="1" min="1"
                                     max="{{ $product['stock'] ?? 10 }}" class="form-control" style="width: 100px;">
                             </div>
-                            <input type="hidden" name="product_id" value="{{ $product['id'] }}">
-                            <button type="submit" class="btn btn-danger btn-lg">
+                            <button type="button" class="btn btn-danger btn-lg me-2" onclick="addToCart({{ $product['id'] ?? 0 }})">
                                 <i class="fa fa-cart-plus me-2"></i>Thêm vào giỏ hàng
                             </button>
-                            <button type="button" class="btn btn-success btn-lg ms-2" data-bs-toggle="modal"
+                            <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal"
                                 data-bs-target="#orderNowModal">
                                 <i class="fa fa-credit-card me-2"></i>Mua ngay
                             </button>
-                        </form>
+                        </div>
 
                         <div class="text-muted small mb-4">
                             <strong>Tình trạng:</strong>

@@ -5,86 +5,192 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Validation\ValidationException;
 
 class CustomerController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    protected $apiUrl;
+
+    public function __construct()
     {
-        if (!session('admin_token')) {
-            return redirect()->route('admin.auth.login');
-        }
-        $apiUrl = config('app.be_api_url', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/');
-        $token = session('admin_token');
-        $customers = Http::withToken($token)->get($apiUrl . '/api/customers')->json('data') ?? [];
-        return view('admin.customers.index', compact('customers'));
+        $this->apiUrl = rtrim(config('app.be_api_url'), '/');
     }
 
     /**
-     * Show the form for creating a new resource.
+     * HÀM TỐI ƯU: Tạo API call request
+     * @return PendingRequest|RedirectResponse
+     */
+    private function api()
+    {
+        $token = session('admin_token');
+        // 1. TỐI ƯU BẢO MẬT: Kiểm tra token ở một nơi duy nhất
+        if (!$token) {
+            return redirect()->route('admin.auth.login');
+        }
+        return Http::withToken($token)
+            ->baseUrl($this->apiUrl . '/api')
+            ->timeout(15);
+    }
+
+    /**
+     * 2. TỐI ƯU HIỆU SUẤT: Hỗ trợ phân trang và tìm kiếm
+     */
+    public function index(Request $request)
+    {
+        $api = $this->api();
+        if ($api instanceof RedirectResponse) return $api;
+
+        try {
+            // Gửi tất cả query (page, search...) lên backend
+            $response = $api->get('/customers', $request->query());
+
+            if (!$response->successful()) {
+                return view('admin.customers.index', [
+                    'customers' => [],
+                    'error' => 'API Error: ' . $response->json('message', $response->status())
+                ]);
+            }
+
+            $data = $response->json();
+            return view('admin.customers.index', [
+                'customers' => $data['data'] ?? [],
+                'pagination' => $data['meta'] ?? [],
+                'paginationLinks' => $data['links'] ?? [],
+            ]);
+        } catch (ConnectionException $e) {
+            return view('admin.customers.index', [
+                'customers' => [],
+                'error' => 'Lỗi kết nối backend: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * TỐI ƯU: Thêm kiểm tra auth
      */
     public function create()
     {
+        $api = $this->api();
+        if ($api instanceof RedirectResponse) return $api;
+
         return view('admin.customers.create');
     }
 
     /**
-     * Store a newly created resource in storage.
+     * 3. TỐI ƯU XỬ LÝ LỖI (Auth + Validation)
      */
     public function store(Request $request)
     {
-        $data = $request->all();
-        $response = Http::post(env('BE_API_URL', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/') . '/api/customers', $data);
-        if ($response->successful()) {
-            return redirect()->route('admin.customers.index')->with('success', 'Tạo khách hàng thành công.');
+        $api = $this->api(); // Sửa lỗi bảo mật (thiếu auth)
+        if ($api instanceof RedirectResponse) return $api;
+
+        try {
+            $response = $api->post('/customers', $request->all());
+
+            if ($response->successful()) {
+                return redirect()->route('admin.customers.index')->with('success', 'Tạo khách hàng thành công.');
+            }
+
+            if ($response->status() == 422) {
+                throw ValidationException::withMessages($response->json('errors', []));
+            }
+
+            return back()->withErrors($response->json('message', 'Lỗi không xác định'))->withInput();
+        } catch (ConnectionException $e) {
+            return back()->withErrors('Lỗi kết nối: ' . $e->getMessage())->withInput();
         }
-        return back()->withErrors('Lỗi khi tạo khách hàng');
     }
 
     /**
-     * Display the specified resource.
+     * TỐI ƯU: Thêm auth và xử lý lỗi
      */
     public function show($id)
     {
-        $response = Http::get(env('BE_API_URL', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/') . "/api/customers/{$id}");
-        $customer = $response->json() ?? [];
-        return view('admin.customers.show', compact('customer'));
+        $api = $this->api(); // Sửa lỗi bảo mật (thiếu auth)
+        if ($api instanceof RedirectResponse) return $api;
+
+        try {
+            $response = $api->get("/customers/{$id}");
+
+            if (!$response->successful()) {
+                abort(404, 'Không tìm thấy khách hàng');
+            }
+
+            $customer = $response->json('data', $response->json() ?? []);
+            return view('admin.customers.show', compact('customer'));
+        } catch (ConnectionException $e) {
+            return back()->withErrors('Lỗi kết nối: ' . $e->getMessage());
+        }
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * TỐI ƯU: Thêm auth và xử lý lỗi
      */
     public function edit($id)
     {
-        $response = Http::get("https://be-qlxm-9b1bc6070adf.herokuapp.com//api/customers/{$id}");
-        $customer = $response->json() ?? [];
-        return view('admin.customers.edit', compact('customer'));
+        $api = $this->api(); // Sửa lỗi bảo mật (thiếu auth)
+        if ($api instanceof RedirectResponse) return $api;
+
+        try {
+            $response = $api->get("/customers/{$id}");
+
+            if (!$response->successful()) {
+                abort(404, 'Không tìm thấy khách hàng');
+            }
+
+            $customer = $response->json('data', $response->json() ?? []);
+            return view('admin.customers.edit', compact('customer'));
+        } catch (ConnectionException $e) {
+            return back()->withErrors('Lỗi kết nối: ' . $e->getMessage());
+        }
     }
 
     /**
-     * Update the specified resource in storage.
+     * TỐI ƯU: Thêm auth và xử lý lỗi
      */
     public function update(Request $request, $id)
     {
-        $data = $request->all();
-        $response = Http::put(env('BE_API_URL', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/') . "/api/customers/{$id}", $data);
-        if ($response->successful()) {
-            return redirect()->route('admin.customers.index')->with('success', 'Cập nhật khách hàng thành công.');
+        $api = $this->api(); // Sửa lỗi bảo mật (thiếu auth)
+        if ($api instanceof RedirectResponse) return $api;
+
+        try {
+            $response = $api->put("/customers/{$id}", $request->all());
+
+            if ($response->successful()) {
+                return redirect()->route('admin.customers.index')->with('success', 'Cập nhật khách hàng thành công.');
+            }
+
+            if ($response->status() == 422) {
+                throw ValidationException::withMessages($response->json('errors', []));
+            }
+
+            return back()->withErrors($response->json('message', 'Lỗi không xác định'))->withInput();
+        } catch (ConnectionException $e) {
+            return back()->withErrors('Lỗi kết nối: ' . $e->getMessage())->withInput();
         }
-        return back()->withErrors('Lỗi khi cập nhật khách hàng');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * TỐI ƯU: Thêm auth và xử lý lỗi
      */
     public function destroy($id)
     {
-        $response = Http::delete(env('BE_API_URL', 'https://be-qlxm-9b1bc6070adf.herokuapp.com/') . "/api/customers/{$id}");
-        if ($response->successful()) {
+        $api = $this->api(); // Sửa lỗi bảo mật (thiếu auth)
+        if ($api instanceof RedirectResponse) return $api;
+
+        try {
+            $response = $api->delete("/customers/{$id}");
+
+            if (!$response->successful()) {
+                return back()->withErrors($response->json('message', 'Lỗi khi xóa'));
+            }
+
             return redirect()->route('admin.customers.index')->with('success', 'Xóa khách hàng thành công.');
+        } catch (ConnectionException $e) {
+            return back()->withErrors('Lỗi kết nối: ' . $e->getMessage());
         }
-        return back()->withErrors('Lỗi khi xóa khách hàng');
     }
 }
